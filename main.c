@@ -1,92 +1,184 @@
-#include "Hamlib.h"
-#include "PerlinNoise.h"
-uint worldsize=500,ROCK=0,FOREST=1,CITY=2,WATER=3,GRASS=-1,type;		//constants for world size, states (and textures at the same time)
-Hauto_OBJ *automat;														//the world automat
-float **landscape;
-typedef struct{ int state; float wateramount; void *rootwater; float height; }Cell;
+#include "Hamlib.h"														//hamlib include
+#include "PerlinNoise.h"												//perlin noise generator include
+
+uint worldsize=500;														//so the cellular automat grid will be 500x500								
+uint ROCK=0,FOREST=1,CITY=2,WATER=3,GRASS=-1;							//indexes for textures and cell states in one 
+uint type;																//the cell type currently selected with the keys placed on mouse click
+Hauto_OBJ *automat;														//the "object" simulating the cellular grid with its rules
+float **landscape;														//initially storing generated height information for the landscape
+
+typedef struct
+{
+	int state;															//cell type
+	float wateramount;													//ground water
+	void *rootwater;													//root pointer (from which water cell does the water cell come from)
+	float height;														//the height of the cell, at first resulting from the landscape, but can change then
+}Cell;
+
 Cell *Cell_NEW(int i,int j) 		 									//constructor for a new cell called for every cell when the automat constructor is called
 {
-	Cell *ret=(Cell*)malloc(sizeof(Cell));
-	ret->state=GRASS; ret->wateramount=0; ret->rootwater=NULL; ret->height=landscape[i][j];
-	return ret;
+	Cell *ret=(Cell*)malloc(sizeof(Cell));								//allocating memory for the Cell pointer
+	ret->state=GRASS;													//setting default state to GRASS
+	ret->wateramount=0;													//no ground water by default
+	ret->rootwater=NULL;												//no root pointer
+	ret->height=landscape[i][j];										//setting height to the landscape height at current position
+	return ret;															//return our created object
 }
+
 void Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* right,Cell* up,Cell* down,Cell* left_up,Cell* left_down,Cell* right_up,Cell* right_down,Cell ***readcells)
 {
-	float being_a(Cell *c,int state){return c->state==state;}
-	float water_amount(Cell *c,void *z){return c->wateramount;}
-	float water_and_higher_than(Cell *c,float *height){return c->state==WATER && c->height>*height;}
-	writeme->state=readme->state;
-	//water delivers maximum ground water:
-	if(readme->state==WATER){ writeme->wateramount=1; } 					
-	//ground water floods neighborhood:
-	if(readme->state!=WATER){ writeme->wateramount=9*NeighborsValue(op_max,water_amount,NULL)/10; } 
-	//a cell which is grass and has 3 wood neighbours and ground water becomes forest: (t%10==0 && to make it slower)
-	if(readme->state==GRASS && NeighborsValue(op_plus,being_a,FOREST)==3 && NeighborsValue(op_plus,water_amount,NULL)/N>0.1){ writeme->state=FOREST; } //also try 2 instead 3
-	//a cell which isn't rock which has neighbors with water on a higher position gets water and remembers a root cell (water flows downwards)
-	if(readme->state!=WATER && readme->state!=ROCK && NeighborsValue(op_or,water_and_higher_than,&readme->height)){ writeme->state=WATER; writeme->rootwater=FirstNeigbor(water_and_higher_than,&readme->height);} 
-	//water without having a root water has lost its source
-	if(readme->state==WATER && readme->rootwater!=NULL && ((Cell*)readme->rootwater)->state!=WATER){ writeme->state=GRASS; writeme->rootwater=NULL; }
+	float being_a(Cell *c,int state)									//a function returning true if the state of cell c equals state else false
+	{
+		return c->state==state;
+	}
+	
+	float water_amount(Cell *c,void *z)									
+	{
+		return c->wateramount;											//a function returning the ground water amount of a cell
+	}
+	
+	float water_and_higher_than(Cell *c,float *height)					
+	{
+		return c->state==WATER && c->height>*height;					//a function which only returns true if the cell c is of type water, and higher than height
+	}
+	
+	writeme->state=readme->state;										//eliminating not defined behavior of not handled cases
+	
+	if(readme->state==WATER)																			
+	{
+		writeme->wateramount=1;											//water delivers maximum ground water to its surrounding
+	}
+	
+	
+	if(readme->state!=WATER)											//ground water also gets distributed to its neighborhood
+	{
+		writeme->wateramount=9*NeighborsValue(op_max,water_amount,NULL)/10; 
+	} 
+	
+	if(readme->state==GRASS && NeighborsValue(op_plus,being_a,FOREST)==3 && NeighborsValue(op_plus,water_amount,NULL)/N>0.1) //(t%10==0 && .. to make it slower) also try 2 instead 3
+	{
+		writeme->state=FOREST;											//a cell which is grass and has 3 wood neighbours and enough ground water becomes forest
+	} 
+	
+	if(readme->state!=WATER && readme->state!=ROCK && NeighborsValue(op_or,water_and_higher_than,&readme->height))
+	{ 
+		writeme->state=WATER; 											//(water flows downwards) a cell which isn't rock which has neighbors with water on a higher position gets water and remembers a root cell
+		writeme->rootwater=FirstNeigbor(water_and_higher_than,&readme->height);
+	} 
+	
+	if(readme->state==WATER && readme->rootwater!=NULL && ((Cell*)readme->rootwater)->state!=WATER)
+	{
+		writeme->state=GRASS;											//water without having a root water has lost its source
+		writeme->rootwater=NULL; 
+	}
 }
+
 void draw()
 {
 	int i,j;
-	for(i=1;i<automat->n-1;i++)
+	for(i=1;i<automat->n-1;i++)											//iterate through
 	{
-		for(j=1;j<automat->n-1;j++)
-		{																//draw cell only if camera sees it and if state!=GRASS
+		for(j=1;j<automat->n-1;j++)										//the grid
+		{																//draw cell only if camera sees, wouldn't make sense else
 			if(abs(hnav_MouseToWorldCoordX(hrend.width/2)-i)<hnav_MouseToWorldCoordX(hrend.width/2)-hnav_MouseToWorldCoordX(0) 	
 		    && abs(hnav_MouseToWorldCoordY(hrend.height/2)-j)<hnav_MouseToWorldCoordY(0)-hnav_MouseToWorldCoordY(hrend.height/2))
-			{
+			{															//select color and draw
 				hrend_SelectColor(0.5+((Cell*)automat->readCells[i][j])->height/1.5,0.4+((Cell*)automat->readCells[i][j])->height/1.5,0.2+((Cell*)automat->readCells[i][j])->height/1.5+((Cell*)automat->readCells[i][j])->wateramount/5.0,1);
 				hrend_DrawObj(i,j,0,0.5,1,((Cell*)automat->readCells[i][j])->state);
 			}
 		}
 	}
-	Wait(0.001);
+	Wait(0.001);														//wait a bit to not consume max. CPU
 }
+
 void mouse_down(EventArgs *e)
-{																		//get world coordinates of cursor and check if it is in automat range
+{																		//get world coordinates of cursor and check if it is in the automats range
 	int i=(int)(hnav_MouseToWorldCoordX(e->mx)+0.5),j=(int)(hnav_MouseToWorldCoordY(e->my)+0.5); 
 	if(i>=0 && j>=0 && i<(automat->n) && j<(automat->n))
 	{
-		if(e->mk==1){ SetCell(i,j,Cell,state,type); }					//set the cell to the selected type on left mouse
+		if(e->mk==1)
+		{
+			SetCell(i,j,Cell,state,type);								//set the cell to the selected type on left mouse
+		}																
 	}
 }
+
 void key_up(EventArgs*e) 
 {
-	if(e->mk=='W'){type=WATER;}											//select the types for the placement of objects with keys
-	if(e->mk=='R'){type=ROCK;}
-	if(e->mk=='C'){type=CITY;}
-	if(e->mk=='F'){type=FOREST;}
-	if(e->mk=='G'){type=GRASS;}
+	if(e->mk=='W')														
+	{
+		type=WATER;														//select the types for the placement of objects with keys
+	}																	
+	if(e->mk=='R')
+	{
+		type=ROCK;														//select the types for the placement of objects with keys
+	}
+	if(e->mk=='C')
+	{
+		type=CITY;														//select the types for the placement of objects with keys
+	}
+	if(e->mk=='F')
+	{
+		type=FOREST;													//select the types for the placement of objects with keys
+	}
+	if(e->mk=='G')														
+	{
+		type=GRASS;														//select the types for the placement of objects with keys
+	}
 }
+
 void Automat_Thread()
 {
-	while(1){ Hauto_OBJ_Exec(automat); Wait(0.001); }					//update automat state and wait a bit
+	while(1)
+	{
+		Hauto_OBJ_Exec(automat);										//update automat state and 
+		Wait(0.001);													//wait a bit to not consume max CPU core time
+	}					
 }
+
 void GenerateNature()
 {
 	int i,j;
-	for(i=2;i<worldsize-2;i++)
+	for(i=2;i<worldsize-2;i++)											//iterate through
 	{
-		for(j=2;j<worldsize-2;j++)
-		{
-			if(frnd()>0.9998){SetCell(i,j,Cell,state,WATER);}
-			if(frnd()>0.9990){SetCell(i,j,Cell,state,FOREST);SetCell(i+1,j,Cell,state,FOREST);SetCell(i,j+1,Cell,state,FOREST);SetCell(i-1,j,Cell,state,FOREST);}
+		for(j=2;j<worldsize-2;j++)										//the grid
+		{	
+			if(frnd()>0.9998)											
+			{
+				SetCell(i,j,Cell,state,WATER);							//maybe place some water
+			}
+			if(frnd()>0.9990)
+			{
+				SetCell(i,j,Cell,state,FOREST);							//maybe some forest
+				SetCell(i+1,j,Cell,state,FOREST);
+				SetCell(i,j+1,Cell,state,FOREST);
+				SetCell(i-1,j,Cell,state,FOREST);
+			}
 		}
 	}
 }
+
 void init()  
-{																		//make the functions known to Hamlib, load textures, and other init stuff:
-	hnav_SetRendFunc(draw); hrend_2Dmode(0.5,0.6,0.5); hinput_AddMouseDown(mouse_down);hinput_AddMouseDragged(mouse_down); hinput_AddKeyUp(key_up);
-	hfio_LoadTex("forest.tga",&FOREST); hfio_LoadTex("city.tga",&CITY); hfio_LoadTex("rock.tga",&ROCK); hfio_LoadTex("water.tga",&WATER); hfio_LoadTex("grass.tga",&GRASS); type=GRASS;
-	landscape=WhiteNoise(worldsize,worldsize); srand(999);
-	landscape=GeneratePerlinNoise(worldsize,worldsize,WhiteNoise(worldsize,worldsize),8); //10
-	automat=Hauto_OBJ_NEW(10,worldsize,Simulate,Cell_NEW);
-	GenerateNature();
-	Thread_NEW(Automat_Thread,NULL);
+{																		
+	hnav_SetRendFunc(draw);												//set hamlib render routine
+	hrend_2Dmode(0.5,0.6,0.5);											//set hamlib render mode to 2D
+	hinput_AddMouseDown(mouse_down);									//add mouse down event
+	hinput_AddMouseDragged(mouse_down);									//add mouse dragged event
+	hinput_AddKeyUp(key_up);											//add key up event
+	hfio_LoadTex("forest.tga",&FOREST);									//load forest texture
+	hfio_LoadTex("city.tga",&CITY);										//load city texture
+	hfio_LoadTex("rock.tga",&ROCK);										//load rock texture
+	hfio_LoadTex("water.tga",&WATER);									//load water texture
+	hfio_LoadTex("grass.tga",&GRASS);									//load grass texture
+	type=GRASS;															//set default object to place on click to grass
+	srand(999);															//random generator seed. use current time and world will be different on every execution
+	landscape=GeneratePerlinNoise(worldsize,worldsize,WhiteNoise(worldsize,worldsize),8);	//generate landscape
+	automat=Hauto_OBJ_NEW(10,worldsize,Simulate,Cell_NEW);				//create cellular automat object
+	GenerateNature();													//generate the nature on it
+	Thread_NEW(Automat_Thread,NULL);									//create a thread for the automat where it can execute on its own core then
 }
-int main()
+
+int main()																//the main routine
 {
 	Hamlib_CYCLIC(init,NULL,"1111111111111");							//init hamlib
 }
