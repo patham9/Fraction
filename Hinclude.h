@@ -26,7 +26,7 @@
 //**#include "Hvb.h"
 //**#include "Hhashmapping.h"
 #include "Hfio.h"
-//**#include "Hshade.h"
+#include "Hshade.h"
 #include "Hrend.h"
 
 #include "Hinput.h"

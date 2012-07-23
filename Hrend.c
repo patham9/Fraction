@@ -372,7 +372,7 @@ void hrend_INIT(int width, int height,int fullscreen)
 			glfwTerminate(); exit(0);
 		}	
 	}
-	///*GLEW*/ //**GLenum err=glewInit(); if(GLEW_OK!=err){fprintf(stderr, "Error: %s\n", glewGetErrorString(err));}
+	///*GLEW*/ GLenum err=glewInit(); if(GLEW_OK!=err){fprintf(stderr, "Error: %s\n", glewGetErrorString(err));}
 	glfwSetWindowTitle("Hamlib Application");
 	////////////////////////////////////////
 
@@ -383,7 +383,7 @@ void hrend_INIT(int width, int height,int fullscreen)
 	generateDrawDisplayList();
 	hrend.init=1;
 	hrend_AddTextDefs();
-	//**glewInit();
+	glewInit();
 }
 void hrend_UPDATE(){
 	if(hrend.init){

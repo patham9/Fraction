@@ -1,0 +1,8 @@
+varying vec2 texture_coordinate;
+uniform sampler2D my_color_texture;
+
+void main()
+{
+    //sample the texture and multiply it with the openGL color
+    gl_FragColor = (gl_Color*texture2D(my_color_texture, texture_coordinate));
+}

@@ -159,7 +159,8 @@ void GenerateNature()
 }
 
 void init()  
-{																		
+{			
+	glUseProgram(hshade_CreateShaderPair("vertexshader","pixelshader"));//load and use pixel (and vertex) shader													
 	hnav_SetRendFunc(draw);												//set hamlib render routine
 	hrend_2Dmode(0.5,0.6,0.5);											//set hamlib render mode to 2D
 	hinput_AddMouseDown(mouse_down);									//add mouse down event
