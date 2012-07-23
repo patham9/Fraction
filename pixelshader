@@ -1,8 +1,16 @@
 varying vec2 texture_coordinate;
-uniform sampler2D my_color_texture;
+uniform sampler2D texture;
+
+//lets read this data from the CPU so that we can create nice procedural textures for example
+uniform int state;														//cell state and automat time
+uniform int i;
+uniform int j;															//coordinates of the cell and time
+uniform int t;														
+uniform float height;													//height										
+uniform float wateramount;												//ground water
 
 void main()
 {
     //sample the texture and multiply it with the openGL color
-    gl_FragColor = (gl_Color*texture2D(my_color_texture, texture_coordinate));
+    gl_FragColor = gl_Color*texture2D(texture, texture_coordinate);
 }

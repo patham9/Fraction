@@ -4,6 +4,7 @@
 uint worldsize=500;														//so the cellular automat grid will be 500x500								
 uint ROCK=0,FOREST=1,CITY=2,WATER=3,GRASS=-1;							//indexes for textures and cell states in one 
 uint type;																//the cell type currently selected with the keys placed on mouse click
+uint shader_state,shader_wateramount,shader_height,shader_i,shader_j,shader_t;//the shader uniform variables which get to the GPU
 Hauto_OBJ *automat;														//the "object" simulating the cellular grid with its rules
 float **landscape;														//initially storing generated height information for the landscape
 
@@ -49,7 +50,6 @@ void Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* righ
 		writeme->wateramount=1;											//water delivers maximum ground water to its surrounding
 	}
 	
-	
 	if(readme->state!=WATER)											//ground water also gets distributed to its neighborhood
 	{
 		writeme->wateramount=9*NeighborsValue(op_max,water_amount,NULL)/10; 
@@ -83,8 +83,15 @@ void draw()
 			if(abs(hnav_MouseToWorldCoordX(hrend.width/2)-i)<hnav_MouseToWorldCoordX(hrend.width/2)-hnav_MouseToWorldCoordX(0) 	
 		    && abs(hnav_MouseToWorldCoordY(hrend.height/2)-j)<hnav_MouseToWorldCoordY(0)-hnav_MouseToWorldCoordY(hrend.height/2))
 			{															//select color and draw
-				hrend_SelectColor(0.5+((Cell*)automat->readCells[i][j])->height/1.5,0.4+((Cell*)automat->readCells[i][j])->height/1.5,0.2+((Cell*)automat->readCells[i][j])->height/1.5+((Cell*)automat->readCells[i][j])->wateramount/5.0,1);
-				hrend_DrawObj(i,j,0,0.5,1,((Cell*)automat->readCells[i][j])->state);
+				Cell *c=((Cell*)automat->readCells[i][j]);							
+				glUniform1i(shader_state,c->state);						//give variables to GPU
+				glUniform1i(shader_wateramount,c->wateramount);
+				glUniform1f(shader_height,c->height);
+				glUniform1i(shader_i,i);
+				glUniform1i(shader_j,j);
+				glUniform1i(shader_t,automat->t);
+				hrend_SelectColor(0.5+c->height/1.5,0.4+c->height/1.5,0.2+c->height/1.5+c->wateramount/5.0,1);
+				hrend_DrawObj(i,j,0,0.5,1,c->state);
 			}
 		}
 	}
@@ -160,7 +167,15 @@ void GenerateNature()
 
 void init()  
 {			
-	glUseProgram(hshade_CreateShaderPair("vertexshader","pixelshader"));//load and use pixel (and vertex) shader													
+	uint shader=hshade_CreateShaderPair("vertexshader","pixelshader");  //load pixel (and vertex) shader	
+	shader_state,shader_wateramount,shader_height,shader_i,shader_j;	//get GPU "variable pointers"					
+	shader_state=glGetUniformLocation(shader, "state");
+	shader_height=glGetUniformLocation(shader, "height");
+	shader_i=glGetUniformLocation(shader, "i");
+	shader_j=glGetUniformLocation(shader, "j");
+	shader_t=glGetUniformLocation(shader, "t");							//time
+	shader_wateramount=glGetUniformLocation(shader, "wateramount");	
+	glUseProgram(shader);												//use pixel (and vertex) shader
 	hnav_SetRendFunc(draw);												//set hamlib render routine
 	hrend_2Dmode(0.5,0.6,0.5);											//set hamlib render mode to 2D
 	hinput_AddMouseDown(mouse_down);									//add mouse down event
