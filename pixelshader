@@ -5,12 +5,37 @@ uniform sampler2D texture;
 uniform int state;														//cell state and automat time
 uniform int i;
 uniform int j;															//coordinates of the cell and time
-uniform int t;														
+uniform float t;														
 uniform float height;													//height										
 uniform float wateramount;												//ground water
+
+float randgen(float x)
+{ 
+	float a=16807.0; //good value
+	float m=pow(2.0,31.0)-1; 											//value-area (32 bit)
+	int its=3; 															//iterations
+	int n=0;
+	while(n<its)
+	{
+		x=mod((a*x),m);													//linear congruential generator	
+		n++;
+	}
+	return float(x/pow(2.0,31.0));
+}
+float offset=0;
+float randwt() 															//without time, because of its deterministic character, it is like if a HUGE amount
+{ 																		//of data is saved on the GPU, which isn't, its just recalculated all the time
+	offset++;															//with this random generator we can implement procedural textures
+	return randgen(1000*texture_coordinate.x+1000*texture_coordinate.y+offset); 
+}
+float rand() 															//random with time, maybe no usage
+{ 
+	offset++;
+	return randgen(sin(t)*1000+1000*texture_coordinate.x+1000*texture_coordinate.y+offset);
+}
 
 void main()
 {
     //sample the texture and multiply it with the openGL color
-    gl_FragColor = gl_Color*texture2D(texture, texture_coordinate);
+    gl_FragColor = (gl_Color*texture2D(texture, texture_coordinate));
 }

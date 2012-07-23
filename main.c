@@ -89,7 +89,7 @@ void draw()
 				glUniform1f(shader_height,c->height);
 				glUniform1i(shader_i,i);
 				glUniform1i(shader_j,j);
-				glUniform1i(shader_t,automat->t);
+				glUniform1f(shader_t,(float)glfwGetTime());
 				hrend_SelectColor(0.5+c->height/1.5,0.4+c->height/1.5,0.2+c->height/1.5+c->wateramount/5.0,1);
 				hrend_DrawObj(i,j,0,0.5,1,c->state);
 			}
