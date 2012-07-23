@@ -8,6 +8,7 @@ uniform int j;															//coordinates of the cell and time
 uniform float t;														
 uniform float height;													//height										
 uniform float wateramount;												//ground water
+uniform int ROCK,FOREST,CITY,WATER,GRASS;								//constants we need to work with
 
 float randgen(float x)
 { 
@@ -33,9 +34,21 @@ float rand() 															//random with time, maybe no usage
 	offset++;
 	return randgen(sin(t)*1000+1000*texture_coordinate.x+1000*texture_coordinate.y+offset);
 }
+float pixel_positionX()
+{
+	return i+(1-texture_coordinate.x);
+}
+float pixel_positionY()
+{
+	return j+(1-texture_coordinate.y);
+}
 
 void main()
 {
     //sample the texture and multiply it with the openGL color
-    gl_FragColor = (gl_Color*texture2D(texture, texture_coordinate));
+    gl_FragColor = gl_Color*texture2D(texture, texture_coordinate);
+    if(state==WATER)
+    {
+		gl_FragColor+=0.01*sin(pixel_positionX()+t)*cos(pixel_positionY()+t);
+    }
 }

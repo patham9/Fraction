@@ -32,40 +32,32 @@ void Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* righ
 	{
 		return c->state==state;
 	}
-	
 	float water_amount(Cell *c,void *z)									
 	{
 		return c->wateramount;											//a function returning the ground water amount of a cell
 	}
-	
 	float water_and_higher_than(Cell *c,float *height)					
 	{
 		return c->state==WATER && c->height>*height;					//a function which only returns true if the cell c is of type water, and higher than height
 	}
-	
 	writeme->state=readme->state;										//eliminating not defined behavior of not handled cases
-	
 	if(readme->state==WATER)																			
 	{
 		writeme->wateramount=1;											//water delivers maximum ground water to its surrounding
 	}
-	
 	if(readme->state!=WATER)											//ground water also gets distributed to its neighborhood
 	{
 		writeme->wateramount=9*NeighborsValue(op_max,water_amount,NULL)/10; 
 	} 
-	
 	if(readme->state==GRASS && NeighborsValue(op_plus,being_a,FOREST)==3 && NeighborsValue(op_plus,water_amount,NULL)/N>0.1) //(t%10==0 && .. to make it slower) also try 2 instead 3
 	{
 		writeme->state=FOREST;											//a cell which is grass and has 3 wood neighbours and enough ground water becomes forest
 	} 
-	
 	if(readme->state!=WATER && readme->state!=ROCK && NeighborsValue(op_or,water_and_higher_than,&readme->height))
 	{ 
 		writeme->state=WATER; 											//(water flows downwards) a cell which isn't rock which has neighbors with water on a higher position gets water and remembers a root cell
 		writeme->rootwater=FirstNeigbor(water_and_higher_than,&readme->height);
 	} 
-	
 	if(readme->state==WATER && readme->rootwater!=NULL && ((Cell*)readme->rootwater)->state!=WATER)
 	{
 		writeme->state=GRASS;											//water without having a root water has lost its source
@@ -176,16 +168,21 @@ void init()
 	shader_t=glGetUniformLocation(shader, "t");							//time
 	shader_wateramount=glGetUniformLocation(shader, "wateramount");	
 	glUseProgram(shader);												//use pixel (and vertex) shader
-	hnav_SetRendFunc(draw);												//set hamlib render routine
-	hrend_2Dmode(0.5,0.6,0.5);											//set hamlib render mode to 2D
-	hinput_AddMouseDown(mouse_down);									//add mouse down event
-	hinput_AddMouseDragged(mouse_down);									//add mouse dragged event
-	hinput_AddKeyUp(key_up);											//add key up event
 	hfio_LoadTex("forest.tga",&FOREST);									//load forest texture
 	hfio_LoadTex("city.tga",&CITY);										//load city texture
 	hfio_LoadTex("rock.tga",&ROCK);										//load rock texture
 	hfio_LoadTex("water.tga",&WATER);									//load water texture
 	hfio_LoadTex("grass.tga",&GRASS);									//load grass texture
+	glUniform1i(glGetUniformLocation(shader, "ROCK"),ROCK);				
+	glUniform1i(glGetUniformLocation(shader, "FOREST"),FOREST);			//make GPU know of our state constants
+	glUniform1i(glGetUniformLocation(shader, "CITY"),CITY);
+	glUniform1i(glGetUniformLocation(shader, "WATER"),WATER);
+	glUniform1i(glGetUniformLocation(shader, "GRASS"),GRASS);
+	hnav_SetRendFunc(draw);												//set hamlib render routine
+	hrend_2Dmode(0.5,0.6,0.5);											//set hamlib render mode to 2D
+	hinput_AddMouseDown(mouse_down);									//add mouse down event
+	hinput_AddMouseDragged(mouse_down);									//add mouse dragged event
+	hinput_AddKeyUp(key_up);											//add key up event
 	type=GRASS;															//set default object to place on click to grass
 	srand(999);															//random generator seed. use current time and world will be different on every execution
 	landscape=GeneratePerlinNoise(worldsize,worldsize,WhiteNoise(worldsize,worldsize),8);	//generate landscape
