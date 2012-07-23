@@ -4,12 +4,13 @@
 uint worldsize=500;														//so the cellular automat grid will be 500x500								
 uint ROCK=0,FOREST=1,CITY=2,WATER=3,GRASS=-1;							//indexes for textures and cell states in one 
 uint type;																//the cell type currently selected with the keys placed on mouse click
-uint shader_state,shader_wateramount,shader_height,shader_i,shader_j,shader_t;//the shader uniform variables which get to the GPU
+uint shader_state,shader_wateramount,shader_height,shader_i,shader_j,shader_t,shader_lastchange;//shader uniform variables to the GPU
 Hauto_OBJ *automat;														//the "object" simulating the cellular grid with its rules
 float **landscape;														//initially storing generated height information for the landscape
 
 typedef struct
 {
+	int lastchange;														//when did the cell change the last time? procedural texture generator wants to know
 	int state;															//cell type
 	float wateramount;													//ground water
 	void *rootwater;													//root pointer (from which water cell does the water cell come from)
@@ -21,6 +22,7 @@ Cell *Cell_NEW(int i,int j) 		 									//constructor for a new cell called for 
 	Cell *ret=(Cell*)malloc(sizeof(Cell));								//allocating memory for the Cell pointer
 	ret->state=GRASS;													//setting default state to GRASS
 	ret->wateramount=0;													//no ground water by default
+	ret->lastchange=0;													//
 	ret->rootwater=NULL;												//no root pointer
 	ret->height=landscape[i][j];										//setting height to the landscape height at current position
 	return ret;															//return our created object
@@ -40,6 +42,7 @@ void Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* righ
 	{
 		return c->state==WATER && c->height>*height;					//a function which only returns true if the cell c is of type water, and higher than height
 	}
+	writeme->lastchange=readme->lastchange+1;
 	writeme->state=readme->state;										//eliminating not defined behavior of not handled cases
 	if(readme->state==WATER)																			
 	{
@@ -52,16 +55,19 @@ void Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* righ
 	if(readme->state==GRASS && NeighborsValue(op_plus,being_a,FOREST)==3 && NeighborsValue(op_plus,water_amount,NULL)/N>0.1) //(t%10==0 && .. to make it slower) also try 2 instead 3
 	{
 		writeme->state=FOREST;											//a cell which is grass and has 3 wood neighbours and enough ground water becomes forest
+		writeme->lastchange=0;
 	} 
 	if(readme->state!=WATER && readme->state!=ROCK && NeighborsValue(op_or,water_and_higher_than,&readme->height))
 	{ 
 		writeme->state=WATER; 											//(water flows downwards) a cell which isn't rock which has neighbors with water on a higher position gets water and remembers a root cell
 		writeme->rootwater=FirstNeigbor(water_and_higher_than,&readme->height);
+		writeme->lastchange=0;
 	} 
 	if(readme->state==WATER && readme->rootwater!=NULL && ((Cell*)readme->rootwater)->state!=WATER)
 	{
 		writeme->state=GRASS;											//water without having a root water has lost its source
 		writeme->rootwater=NULL; 
+		writeme->lastchange=0;
 	}
 }
 
@@ -81,6 +87,7 @@ void draw()
 				glUniform1f(shader_height,c->height);
 				glUniform1i(shader_i,i);
 				glUniform1i(shader_j,j);
+				glUniform1i(shader_lastchange,c->lastchange);
 				glUniform1f(shader_t,(float)glfwGetTime());
 				hrend_SelectColor(0.5+c->height/1.5,0.4+c->height/1.5,0.2+c->height/1.5+c->wateramount/5.0,1);
 				hrend_DrawObj(i,j,0,0.5,1,c->state);
@@ -166,6 +173,7 @@ void init()
 	shader_i=glGetUniformLocation(shader, "i");
 	shader_j=glGetUniformLocation(shader, "j");
 	shader_t=glGetUniformLocation(shader, "t");							//time
+	shader_lastchange=glGetUniformLocation(shader, "lastchange");		//steps since last change
 	shader_wateramount=glGetUniformLocation(shader, "wateramount");	
 	glUseProgram(shader);												//use pixel (and vertex) shader
 	hfio_LoadTex("forest.tga",&FOREST);									//load forest texture

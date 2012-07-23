@@ -5,6 +5,7 @@ uniform sampler2D texture;
 uniform int state;														//cell state and automat time
 uniform int i;
 uniform int j;															//coordinates of the cell and time
+uniform int lastchange;													//steps since last change
 uniform float t;														
 uniform float height;													//height										
 uniform float wateramount;												//ground water
@@ -50,5 +51,9 @@ void main()
     if(state==WATER)
     {
 		gl_FragColor+=0.01*sin(pixel_positionX()+t)*cos(pixel_positionY()+t);
+    }
+    if(state==WATER && lastchange<3) //it became water not long ago, so make noise
+    {
+		gl_FragColor+=0.1*rand();
     }
 }
