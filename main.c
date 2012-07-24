@@ -1,5 +1,6 @@
 #include "Hamlib.h"														//hamlib include
 #include "PerlinNoise.h"												//perlin noise generator include
+//#define NEWRENDERER
 
 static uint worldsize=512;												//so the cellular automat grid will be 500x500								
 uint ROCK=1,FOREST=2,CITY=3,WATER=4,GRASS=-1,GPUTex;					//indexes for textures and cell states in one 
@@ -76,6 +77,7 @@ int btoGPU=0;
 void draw()
 {
 	int i,j,k=0;
+#ifdef NEWRENDERER
 	for(i=0;i<automat->n;i++)											//iterate through
 	{
 		for(j=0;j<automat->n;j++)										//the grid
@@ -114,6 +116,22 @@ void draw()
 	glEnable(GL_TEXTURE_2D);
 	hrend_DrawObj(worldsize/2-0.25,worldsize/2-0.25,0,worldsize/2,1,WATER);
 	Wait(0.001);														//wait a bit to not consume max. CPU
+#endif
+#ifndef NEWRENDERER
+	for(i=1;i<automat->n-1;i++)											//iterate through
+	{
+		for(j=1;j<automat->n-1;j++)										//the grid
+		{																//draw cell only if camera sees, wouldn't make sense else
+			if(abs(hnav_MouseToWorldCoordX(hrend.width/2)-i)<hnav_MouseToWorldCoordX(hrend.width/2)-hnav_MouseToWorldCoordX(0) 	
+		    && abs(hnav_MouseToWorldCoordY(hrend.height/2)-j)<hnav_MouseToWorldCoordY(0)-hnav_MouseToWorldCoordY(hrend.height/2))
+			{															//select color and draw
+				hrend_SelectColor(0.5+((Cell*)automat->readCells[i][j])->height/1.5,0.4+((Cell*)automat->readCells[i][j])->height/1.5,0.2+((Cell*)automat->readCells[i][j])->height/1.5+((Cell*)automat->readCells[i][j])->wateramount/5.0,1);
+				hrend_DrawObj(i,j,0,0.5,1,((Cell*)automat->readCells[i][j])->state);
+			}
+		}
+	}
+	Wait(0.001);
+#endif
 }
 
 void mouse_down(EventArgs *e)
@@ -186,14 +204,15 @@ void GenerateNature()
 
 void init()  
 {			
-	uint i,j;
-	uint shader=hshade_CreateShaderPair("vertexshader","pixelshader");  //load pixel (and vertex) shader					
-	glUseProgram(shader);												//use pixel (and vertex) shader
+	uint i,j,shader;
 	hfio_LoadTex("forest.tga",&FOREST);									//load forest texture
 	hfio_LoadTex("city.tga",&CITY);										//load city texture
 	hfio_LoadTex("rock.tga",&ROCK);										//load rock texture
 	hfio_LoadTex("water.tga",&WATER);									//load water texture
 	hfio_LoadTex("grass.tga",&GRASS);									//load grass texture
+#ifdef NEWRENDERER
+	shader=hshade_CreateShaderPair("vertexshader","pixelshader");  		//load pixel (and vertex) shader					
+	glUseProgram(shader);												//use pixel (and vertex) shader
 	hfio_LoadTex("grass.tga",&GPUTex);									//ehm
 	glUniform1i(glGetUniformLocation(shader, "data"), 0);
 	glUniform1i(glGetUniformLocation(shader, "grass_texture"), 1);
@@ -209,6 +228,7 @@ void init()
 	glUniform1f(glGetUniformLocation(shader, "GRASS"),1.0/(float)GRASS);
 	glUniform1i(glGetUniformLocation(shader, "worldsize"),worldsize);
 	toGPU=(float*)malloc(worldsize*worldsize*4*sizeof(float));		
+#endif
 	hnav_SetRendFunc(draw);												//set hamlib render routine
 	hrend_2Dmode(0.5,0.6,0.5);											//set hamlib render mode to 2D
 	hinput_AddMouseDown(mouse_down);									//add mouse down event
