@@ -72,6 +72,7 @@ void Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* righ
 }
 
 float *toGPU; //2D array of state, lastchange, height, wateramount
+int btoGPU=0;
 void draw()
 {
 	int i,j,k=0;
@@ -90,9 +91,13 @@ void draw()
 	glActiveTexture(GL_TEXTURE0);										//give data to GPU
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D,GPUTex);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, worldsize, worldsize, 0, GL_RGBA, GL_FLOAT, toGPU);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);	//we need the values direct
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	if(btoGPU)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, worldsize, worldsize, 0, GL_RGBA, GL_FLOAT, toGPU);
+		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);	//we need the values direct
+		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+		btoGPU=0;
+	}
 	glActiveTexture(GL_TEXTURE1);										//give textures to GPU
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D,GRASS);
@@ -152,6 +157,7 @@ void Automat_Thread()
 	while(1)
 	{
 		Hauto_OBJ_Exec(automat);										//update automat state and 
+		btoGPU=1;
 		Wait(0.001);													//wait a bit to not consume max CPU core time
 	}					
 }
