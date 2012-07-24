@@ -1,15 +1,15 @@
 varying vec2 texture_coordinate;
-uniform sampler2D texture;
+uniform sampler2D data;
+uniform sampler2D grass_texture;
+uniform sampler2D city_texture;
+uniform sampler2D forest_texture;
+uniform sampler2D rock_texture;
+uniform sampler2D water_texture;
 
-//lets read this data from the CPU so that we can create nice procedural textures for example
-uniform int state;														//cell state and automat time
-uniform int i;
-uniform int j;															//coordinates of the cell and time
-uniform int lastchange;													//steps since last change
+//lets read this additional variables from the CPU (ram)
 uniform float t;														
-uniform float height;													//height										
-uniform float wateramount;												//ground water
-uniform int ROCK,FOREST,CITY,WATER,GRASS;								//constants we need to work with
+uniform float ROCK,FOREST,CITY,WATER,GRASS;								//constants we need to work with
+uniform int worldsize;
 
 float randgen(float x)
 { 
@@ -33,27 +33,43 @@ float randwt() 															//without time, because of its deterministic chara
 float rand() 															//random with time, maybe no usage
 { 
 	offset++;
-	return randgen(sin(t)*1000+1000*texture_coordinate.x+1000*texture_coordinate.y+offset);
+	return randgen(t*1000+1000*texture_coordinate.x+1000*texture_coordinate.y+offset);
 }
-float pixel_positionX()
-{
-	return i+(1-texture_coordinate.x);
-}
-float pixel_positionY()
-{
-	return j+(1-texture_coordinate.y);
-}
-
 void main()
-{
-    //sample the texture and multiply it with the openGL color
-    gl_FragColor = gl_Color*texture2D(texture, texture_coordinate);
-    if(state==WATER)
+{ 
+	float state=texture2D(data, texture_coordinate).r;
+	float lastchange=1.0/texture2D(data, texture_coordinate).g-0.1;
+	float height=1.0/texture2D(data, texture_coordinate).b-0.1;
+	float wateramount=1.0/texture2D(data, texture_coordinate).a-0.1;
+	vec4 color=vec4(0.3+height/1.5,0.5+height/1.5,0.0+height/1.5+wateramount/5.0,1);	//calculate color for vis
+	if(abs(state-GRASS)<0.01)			//WHAT THE HELL GPU I wanted FLOAT accuracy!!!!
+	{
+		gl_FragColor=texture2D(grass_texture, texture_coordinate*worldsize);
+	}
+	if(abs(state-ROCK)<0.01)
+	{
+		gl_FragColor=texture2D(rock_texture, texture_coordinate*worldsize);
+	}
+	if(abs(state-CITY)<0.01)
+	{
+		gl_FragColor=texture2D(city_texture, texture_coordinate*worldsize);
+	}
+	if(abs(state-FOREST)<0.01)
+	{
+		gl_FragColor=texture2D(forest_texture, texture_coordinate*worldsize);
+	}
+	if(abs(state-WATER)<0.01)
+	{
+		gl_FragColor=texture2D(water_texture, texture_coordinate*worldsize);
+	}
+	gl_FragColor*=color;
+	if(abs(state-WATER)<0.01)											//water shader
     {
-		gl_FragColor+=0.01*sin(pixel_positionX()+t)*cos(pixel_positionY()+t);
+		gl_FragColor+=0.01*sin(texture_coordinate.x*worldsize+t)*cos(texture_coordinate.y*worldsize+t);
     }
-    if(state==WATER && lastchange<3) //it became water not long ago, so make noise
+    if(abs(state-WATER)<0.01 && lastchange<4)							//it became water not long ago, so make noise/shore
     {
 		gl_FragColor+=0.1*rand();
     }
+	//gl_FragColor=texture2D(data, texture_coordinate);					//debug view if you want :D
 }

@@ -2,7 +2,8 @@ varying vec2 texture_coordinate;
 //here also may be uniforms (but also attributes)
 void main()
 {
+	vec2 temp=vec2(gl_MultiTexCoord0);
     gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex; 			//vertex transformation
 	gl_FrontColor = gl_Color;											//use openGL color
-    texture_coordinate = vec2(gl_MultiTexCoord0);						//texture coordinate of texture unit0 needs to go to the pixelshader
+    texture_coordinate = vec2(1-temp.y,1-temp.x);						//texture coordinate of texture unit0 needs to go to the pixelshader
 }
