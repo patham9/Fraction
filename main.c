@@ -1,11 +1,11 @@
 #include "Hamlib.h"														//hamlib include
 #include "PerlinNoise.h"												//perlin noise generator include
-//#define NEWRENDERER
+#define RENDERMODE 1			//0 CPU, 1 GPU, 2 GPU 3D (pixelshader-based offset mapping etc.)
 
 static uint worldsize=512;												//so the cellular automat grid will be 500x500								
 uint ROCK=1,FOREST=2,CITY=3,WATER=4,GRASS=-1,GPUTex;					//indexes for textures and cell states in one 
 uint type;																//the cell type currently selected with the keys placed on mouse click
-uint shader_state,shader_wateramount,shader_height,shader_i,shader_j,shader_t,shader_lastchange;//shader uniform variables to the GPU
+uint shader_state,shader_wateramount,shader_height,shader_i,shader_j,shader_t,shader_lastchange,shader_difx,shader_dify,shader_zoom;//shader uniform variables to the GPU
 Hauto_OBJ *automat;														//the "object" simulating the cellular grid with its rules
 float **landscape;														//initially storing generated height information for the landscape
 
@@ -25,7 +25,7 @@ Cell *Cell_NEW(int i,int j) 		 									//constructor for a new cell called for 
 	ret->wateramount=0;													//no ground water by default
 	ret->lastchange=0;													//
 	ret->rootwater=NULL;												//no root pointer
-	ret->height=landscape[i][j]*2;										//setting height to the landscape height at current position
+	ret->height=landscape[i][j]*10.0;									//setting height to the landscape height at current position
 	return ret;															//return our created object
 }
 
@@ -77,7 +77,7 @@ int btoGPU=0;
 void draw()
 {
 	int i,j,k=0;
-#ifdef NEWRENDERER
+#if RENDERMODE==1
 	for(i=0;i<automat->n;i++)											//iterate through
 	{
 		for(j=0;j<automat->n;j++)										//the grid
@@ -90,6 +90,9 @@ void draw()
 		}
 	}
 	glUniform1f(shader_t,(float)glfwGetTime());							//set shader time
+	glUniform1f(shader_difx,hnav.difx);
+	glUniform1f(shader_dify,hnav.dify);					
+	glUniform1f(shader_zoom,hnav.zoom);
 	glActiveTexture(GL_TEXTURE0);										//give data to GPU
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D,GPUTex);
@@ -117,7 +120,7 @@ void draw()
 	hrend_DrawObj(worldsize/2-0.25,worldsize/2-0.25,0,worldsize/2,1,WATER);
 	Wait(0.001);														//wait a bit to not consume max. CPU
 #endif
-#ifndef NEWRENDERER
+#if RENDERMODE==0
 	for(i=1;i<automat->n-1;i++)											//iterate through
 	{
 		for(j=1;j<automat->n-1;j++)										//the grid
@@ -125,7 +128,7 @@ void draw()
 			if(abs(hnav_MouseToWorldCoordX(hrend.width/2)-i)<hnav_MouseToWorldCoordX(hrend.width/2)-hnav_MouseToWorldCoordX(0) 	
 		    && abs(hnav_MouseToWorldCoordY(hrend.height/2)-j)<hnav_MouseToWorldCoordY(0)-hnav_MouseToWorldCoordY(hrend.height/2))
 			{															//select color and draw
-				hrend_SelectColor(0.5+((Cell*)automat->readCells[i][j])->height/1.5,0.4+((Cell*)automat->readCells[i][j])->height/1.5,0.2+((Cell*)automat->readCells[i][j])->height/1.5+((Cell*)automat->readCells[i][j])->wateramount/5.0,1);
+				hrend_SelectColor(0.5+((Cell*)automat->readCells[i][j])->height/20.0,0.6+((Cell*)automat->readCells[i][j])->height/20.0,0.2+((Cell*)automat->readCells[i][j])->height/20.0+((Cell*)automat->readCells[i][j])->wateramount/5.0,1);
 				hrend_DrawObj(i,j,0,0.5,1,((Cell*)automat->readCells[i][j])->state);
 			}
 		}
@@ -210,8 +213,13 @@ void init()
 	hfio_LoadTex("rock.tga",&ROCK);										//load rock texture
 	hfio_LoadTex("water.tga",&WATER);									//load water texture
 	hfio_LoadTex("grass.tga",&GRASS);									//load grass texture
-#ifdef NEWRENDERER
-	shader=hshade_CreateShaderPair("vertexshader","pixelshader");  		//load pixel (and vertex) shader					
+#if RENDERMODE==1 || RENDERMODE==2
+#if RENDERMODE==1
+	shader=hshade_CreateShaderPair("vertexshader","pixelshader");  		//load pixel (and vertex) shader	
+#endif	
+#if RENDERMODE==2
+	shader=hshade_CreateShaderPair("vertexshader3d","pixelshader3d");  	//load pixel (and vertex) shader	
+#endif				
 	glUseProgram(shader);												//use pixel (and vertex) shader
 	hfio_LoadTex("grass.tga",&GPUTex);									//ehm
 	glUniform1i(glGetUniformLocation(shader, "data"), 0);
@@ -221,6 +229,9 @@ void init()
 	glUniform1i(glGetUniformLocation(shader, "rock_texture"), 4);
 	glUniform1i(glGetUniformLocation(shader, "water_texture"), 5);
 	shader_t=glGetUniformLocation(shader, "t");							//time
+	shader_difx=glGetUniformLocation(shader, "difx");
+	shader_dify=glGetUniformLocation(shader, "dify");
+	shader_zoom=glGetUniformLocation(shader, "zoom");
 	glUniform1f(glGetUniformLocation(shader, "ROCK"),1.0/(float)ROCK);				//make GPU know of our state constants
 	glUniform1f(glGetUniformLocation(shader, "FOREST"),1.0/(float)FOREST);			
 	glUniform1f(glGetUniformLocation(shader, "CITY"),1.0/(float)CITY);

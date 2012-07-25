@@ -7,7 +7,7 @@ uniform sampler2D rock_texture;
 uniform sampler2D water_texture;
 
 //lets read this additional variables from the CPU (ram)
-uniform float t;														
+uniform float t,difx,dify,zoom;														
 uniform float ROCK,FOREST,CITY,WATER,GRASS;								//constants we need to work with
 uniform int worldsize;
 
@@ -39,9 +39,9 @@ void main()
 { 
 	float state=texture2D(data, texture_coordinate).r;
 	float lastchange=1.0/texture2D(data, texture_coordinate).g-0.1;
-	float height=1.0/texture2D(data, texture_coordinate).b-0.1;
+	float height=(1.0/texture2D(data, texture_coordinate).b-0.1)/10.0;
 	float wateramount=1.0/texture2D(data, texture_coordinate).a-0.1;
-	vec4 color=vec4(0.3+height/1.5,0.5+height/1.5,0.0+height/1.5+wateramount/5.0,1);	//calculate color for vis
+	vec4 color=vec4(0.4+height/1.5,0.6+height/1.5,0.1+height/1.5+wateramount/5.0,1);	//calculate color for vis
 	if(abs(state-GRASS)<0.01)			//WHAT THE HELL GPU I wanted FLOAT accuracy!!!!
 	{
 		gl_FragColor=texture2D(grass_texture, texture_coordinate*worldsize);
