@@ -1,6 +1,6 @@
 #include "Hamlib.h"														//hamlib include
 #include "PerlinNoise.h"												//perlin noise generator include
-#define RENDERMODE 1			//0 CPU, 1 GPU, 2 GPU 3D (pixelshader-based offset mapping etc.)
+#define RENDERMODE 0	//(0 and 2 recommended))						//0 slow GPU, 1 GPU (hm nearly only disadvantages at the moment but let it in for performance measurement reasons, 2 pixelshader, 3 3D pixelshader
 
 static uint worldsize=512;												//so the cellular automat grid will be 500x500								
 uint ROCK=1,FOREST=2,CITY=3,WATER=4,GRASS=-1,GPUTex;					//indexes for textures and cell states in one 
@@ -73,36 +73,59 @@ void Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* righ
 }
 
 float *toGPU; //2D array of state, lastchange, height, wateramount
-int btoGPU=0;
+int btoGPU=0, Initial=1;
 void draw()
 {
 	int i,j,k=0;
-#if RENDERMODE==1
-	for(i=0;i<automat->n;i++)											//iterate through
+#if RENDERMODE!=1														
+	for(j=automat->n-1;j>=0;j--)										//iterate through for(i=automat->n-1;i>0;i--)	
 	{
-		for(j=0;j<automat->n;j++)										//the grid
+		for(i=automat->n-1;i>=0;i--)									//the grid
 		{	
+#endif
+#if RENDERMODE!=1
 			Cell *c=((Cell*)automat->readCells[i][j]);	
+#if RENDERMODE!=0
 			toGPU[k]=1.0/(float)c->state; k++;
 			toGPU[k]=1.0/(0.1+(float)c->lastchange); k++;
 			toGPU[k]=1.0/(0.1+(float)c->height); k++;
 			toGPU[k]=1.0/(0.1+(float)c->wateramount); k++;
+#endif
+#if RENDERMODE==0
+			toGPU[k]=0.5+((Cell*)automat->readCells[i][j])->height/20.0; k++;									//use texture for rendering instead in mode 0
+			toGPU[k]=0.6+((Cell*)automat->readCells[i][j])->height/20.0; k++;
+			toGPU[k]=0.2+((Cell*)automat->readCells[i][j])->height/20.0+((Cell*)automat->readCells[i][j])->wateramount/5.0; k++;
+			toGPU[k]=1.0; k++;
+#endif
 		}
 	}
+#endif
+#if RENDERMODE!=1
+#if RENDERMODE!=0
 	glUniform1f(shader_t,(float)glfwGetTime());							//set shader time
 	glUniform1f(shader_difx,hnav.difx);
 	glUniform1f(shader_dify,hnav.dify);					
 	glUniform1f(shader_zoom,hnav.zoom);
+#endif
 	glActiveTexture(GL_TEXTURE0);										//give data to GPU
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D,GPUTex);
-	if(btoGPU)
+	if(btoGPU || Initial)
 	{
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, worldsize, worldsize, 0, GL_RGBA, GL_FLOAT, toGPU);
+#if RENDERMODE!=0
 		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);	//we need the values direct
 		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-		btoGPU=0;
+#endif
+#if RENDERMODE==0
+		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);	//we need the values direct
+		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+#endif
+		printf("textur zu graka");
+		printf("l9l");
+		btoGPU=0; Initial=0;
 	}
+#if RENDERMODE>=2
 	glActiveTexture(GL_TEXTURE1);										//give textures to GPU
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D,GRASS);
@@ -118,23 +141,32 @@ void draw()
 	glActiveTexture(GL_TEXTURE5);
 	glEnable(GL_TEXTURE_2D);
 	hrend_DrawObj(worldsize/2-0.25,worldsize/2-0.25,0,worldsize/2,1,WATER);
-	Wait(0.001);														//wait a bit to not consume max. CPU
 #endif
+#endif
+#if RENDERMODE==0 || RENDERMODE==1
 #if RENDERMODE==0
+	hrend_SelectColor(0.45, 0.59, 0.31,1);
+	hrend_DrawObj(worldsize/2-0.25,worldsize/2-0.25,0,worldsize/2,1,GPUTex);
+#endif
 	for(i=1;i<automat->n-1;i++)											//iterate through
 	{
 		for(j=1;j<automat->n-1;j++)										//the grid
-		{																//draw cell only if camera sees, wouldn't make sense else
-			if(abs(hnav_MouseToWorldCoordX(hrend.width/2)-i)<hnav_MouseToWorldCoordX(hrend.width/2)-hnav_MouseToWorldCoordX(0) 	
-		    && abs(hnav_MouseToWorldCoordY(hrend.height/2)-j)<hnav_MouseToWorldCoordY(0)-hnav_MouseToWorldCoordY(hrend.height/2))
-			{															//select color and draw
-				hrend_SelectColor(0.5+((Cell*)automat->readCells[i][j])->height/20.0,0.6+((Cell*)automat->readCells[i][j])->height/20.0,0.2+((Cell*)automat->readCells[i][j])->height/20.0+((Cell*)automat->readCells[i][j])->wateramount/5.0,1);
-				hrend_DrawObj(i,j,0,0.5,1,((Cell*)automat->readCells[i][j])->state);
+		{	
+#if RENDERMODE==0
+			if(((Cell*)automat->readCells[i][j])->state!=GRASS)
+#endif			
+			{															//draw cell only if camera sees, wouldn't make sense else
+				if(abs(hnav_MouseToWorldCoordX(hrend.width/2)-i)<hnav_MouseToWorldCoordX(hrend.width/2)-hnav_MouseToWorldCoordX(0) 	
+				&& abs(hnav_MouseToWorldCoordY(hrend.height/2)-j)<hnav_MouseToWorldCoordY(0)-hnav_MouseToWorldCoordY(hrend.height/2))
+				{															//select color and draw
+					hrend_SelectColor(0.5+((Cell*)automat->readCells[i][j])->height/20.0,0.6+((Cell*)automat->readCells[i][j])->height/20.0,0.2+((Cell*)automat->readCells[i][j])->height/20.0+((Cell*)automat->readCells[i][j])->wateramount/5.0,1);
+					hrend_DrawObj(i,j,0,0.5,1,((Cell*)automat->readCells[i][j])->state);
+				}
 			}
 		}
 	}
-	Wait(0.001);
 #endif
+	Wait(0.001);
 }
 
 void mouse_down(EventArgs *e)
@@ -178,7 +210,9 @@ void Automat_Thread()
 	while(1)
 	{
 		Hauto_OBJ_Exec(automat);										//update automat state and 
+#if RENDERMODE!=0														
 		btoGPU=1;
+#endif
 		Wait(0.001);													//wait a bit to not consume max CPU core time
 	}					
 }
@@ -213,11 +247,11 @@ void init()
 	hfio_LoadTex("rock.tga",&ROCK);										//load rock texture
 	hfio_LoadTex("water.tga",&WATER);									//load water texture
 	hfio_LoadTex("grass.tga",&GRASS);									//load grass texture
-#if RENDERMODE==1 || RENDERMODE==2
-#if RENDERMODE==1
+#if RENDERMODE==2 || RENDERMODE==3
+#if RENDERMODE==2
 	shader=hshade_CreateShaderPair("vertexshader","pixelshader");  		//load pixel (and vertex) shader	
 #endif	
-#if RENDERMODE==2
+#if RENDERMODE==3
 	shader=hshade_CreateShaderPair("vertexshader3d","pixelshader3d");  	//load pixel (and vertex) shader	
 #endif				
 	glUseProgram(shader);												//use pixel (and vertex) shader
@@ -237,9 +271,9 @@ void init()
 	glUniform1f(glGetUniformLocation(shader, "CITY"),1.0/(float)CITY);
 	glUniform1f(glGetUniformLocation(shader, "WATER"),1.0/(float)WATER);
 	glUniform1f(glGetUniformLocation(shader, "GRASS"),1.0/(float)GRASS);
-	glUniform1i(glGetUniformLocation(shader, "worldsize"),worldsize);
-	toGPU=(float*)malloc(worldsize*worldsize*4*sizeof(float));		
+	glUniform1i(glGetUniformLocation(shader, "worldsize"),worldsize);	
 #endif
+	toGPU=(float*)malloc(worldsize*worldsize*4*sizeof(float));	
 	hnav_SetRendFunc(draw);												//set hamlib render routine
 	hrend_2Dmode(0.5,0.6,0.5);											//set hamlib render mode to 2D
 	hinput_AddMouseDown(mouse_down);									//add mouse down event
