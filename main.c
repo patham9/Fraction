@@ -277,7 +277,7 @@ void GenerateNature()
 	{
 		for(j=2;j<worldsize-2;j++)										//the grid
 		{	
-			if(drnd()>0.999965)											
+			if(drnd()>0.999940)											
 			{
 				SetCell(i,j,Cell,state,WATER);							//maybe place some water
 			}
@@ -342,8 +342,8 @@ void init()
 	hinput_AddMouseDragged(mouse_down);									//add mouse dragged event
 	hinput_AddKeyUp(key_up);											//add key up event
 	type=GRASS;															//set default object to place on click to grass
-	srand(999);															//random generator seed. use current time and world will be different on every execution
-	landscape=GeneratePerlinNoise(worldsize,worldsize,WhiteNoise(worldsize,worldsize),8,3);	//generate landscape
+	srand(1);															//random generator seed. use current time and world will be different on every execution
+	landscape=GeneratePerlinNoise(worldsize,worldsize,WhiteNoise(worldsize,worldsize),8,2);	//generate landscape
 	automat=Hauto_OBJ_NEW(10,worldsize,Simulate,Cell_NEW);				//create cellular automat object
 	GenerateNature();													//generate the nature on it
 	Thread_NEW(Automat_Thread,NULL);									//create a thread for the automat where it can execute on its own core then
