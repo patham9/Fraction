@@ -9,6 +9,9 @@ uint shader_state,shader_wateramount,shader_height,shader_i,shader_j,shader_t,sh
 Hauto_OBJ *automat;														//the "object" simulating the cellular grid with its rules
 float **landscape;														//initially storing generated height information for the landscape
 
+Thread thread;
+int running = 1;
+
 typedef struct
 {
 	int lastchange;														//when did the cell change the last time? procedural texture generator wants to know
@@ -236,6 +239,14 @@ void mouse_down(EventArgs *e)
 
 void key_up(EventArgs*e) 
 {
+	if (e->mk=='X')
+	{
+		// running will end the main loop of the thread
+		// then we wait and exit normally
+		running = 0;
+		glfwWaitThread(thread, 0);
+		exit(0);
+	}
 	if(e->mk=='W')														
 	{
 		type=WATER;														//select the types for the placement of objects with keys
@@ -260,7 +271,7 @@ void key_up(EventArgs*e)
 
 void Automat_Thread()
 {
-	while(1)
+	while(running)
 	{
 		Hauto_OBJ_Exec(automat);										//update automat state and 
 #if RENDERMODE!=0														
@@ -346,10 +357,31 @@ void init()
 	landscape=GeneratePerlinNoise(worldsize,worldsize,WhiteNoise(worldsize,worldsize),8,2);	//generate landscape
 	automat=Hauto_OBJ_NEW(10,worldsize,Simulate,Cell_NEW);				//create cellular automat object
 	GenerateNature();													//generate the nature on it
-	Thread_NEW(Automat_Thread,NULL);									//create a thread for the automat where it can execute on its own core then
+	thread = Thread_NEW(Automat_Thread,NULL);									//create a thread for the automat where it can execute on its own core then
+}
+
+/* 
+ * This part is to allow to end the program normally through kill -15
+ * (gprof creates the gmon.out only on normal exit)
+ */
+#include<stdio.h>
+#include<signal.h>
+#include<unistd.h>
+
+void sig_handler(int signo)
+{
+  if (signo == SIGTERM)
+  {
+	running = 0;
+	glfwWaitThread(thread, 0);
+	exit(0);
+  }
 }
 
 int main()																//the main routine
 {
+	// connect the signal handler for SIGTERM (15)
+	if (signal(SIGTERM, sig_handler) == SIG_ERR);
+	
 	Hamlib_CYCLIC(init,NULL,"1111111111111");							//init hamlib
 }
