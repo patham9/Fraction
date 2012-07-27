@@ -3,7 +3,7 @@
 #define RENDERMODE 0	//(0 and 2 recommended))						//0 slow GPU, 1 GPU (hm nearly only disadvantages at the moment but let it in for performance measurement reasons, 2 pixelshader, 3 3D pixelshader
 
 static uint worldsize=512;												//so the cellular automat grid will be 500x500								
-uint ROCK=1,FOREST=2,CITY=3,WATER=4,GRASS=-1,GPUTex;					//indexes for textures and cell states in one 
+uint ROCK=1,FOREST=2,CITY=3,WATER=4,GRASS=-1,GRASS_R,GRASS_L,GRASS_T,GRASS_D,GRASS_A,GRASS_RT,GRASS_LT,GRASS_LD,GRASS_RD,GPUTex;//indexes for textures and cell states in one
 uint type;																//the cell type currently selected with the keys placed on mouse click
 uint shader_state,shader_wateramount,shader_height,shader_i,shader_j,shader_t,shader_lastchange,shader_difx,shader_dify,shader_zoom;//shader uniform variables to the GPU
 Hauto_OBJ *automat;														//the "object" simulating the cellular grid with its rules
@@ -28,13 +28,12 @@ Cell *Cell_NEW(int i,int j) 		 									//constructor for a new cell called for 
 	ret->height=landscape[i][j]*10.0;									//setting height to the landscape height at current position
 	return ret;															//return our created object
 }
-
+float being_a(Cell *c,int state)									//a function returning true if the state of cell c equals state else false
+{
+	return c->state==state;
+}
 void Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* right,Cell* up,Cell* down,Cell* left_up,Cell* left_down,Cell* right_up,Cell* right_down,Cell ***readcells)
 {
-	float being_a(Cell *c,int state)									//a function returning true if the state of cell c equals state else false
-	{
-		return c->state==state;
-	}
 	float water_amount(Cell *c,void *z)									
 	{
 		return c->wateramount;											//a function returning the ground water amount of a cell
@@ -57,13 +56,13 @@ void Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* righ
 	{
 		writeme->state=FOREST;											//a cell which is grass and has 3 wood neighbours and enough ground water becomes forest
 		writeme->lastchange=0;
-	} 
+	}
 	if(readme->state!=WATER && readme->state!=ROCK && NeighborsValue(op_or,water_and_higher_than,&readme->height))
 	{ 
 		writeme->state=WATER; 											//(water flows downwards) a cell which isn't rock which has neighbors with water on a higher position gets water and remembers a root cell
-		writeme->rootwater=FirstNeigbor(water_and_higher_than,&readme->height);
+		writeme->rootwater=FirstNeighbor(water_and_higher_than,&readme->height);
 		writeme->lastchange=0;
-	} 
+	}
 	if(readme->state==WATER && readme->rootwater!=NULL && ((Cell*)readme->rootwater)->state!=WATER)
 	{
 		writeme->state=GRASS;											//water without having a root water has lost its source
@@ -121,8 +120,6 @@ void draw()
 		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);	//we need the values direct
 		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
 #endif
-		printf("textur zu graka");
-		printf("l9l");
 		btoGPU=0; Initial=0;
 	}
 #if RENDERMODE>=2
@@ -152,15 +149,71 @@ void draw()
 	{
 		for(j=1;j<automat->n-1;j++)										//the grid
 		{	
+			Cell ***readcells=(Cell***)automat->readCells;
+			Cell *c=readcells[i][j];
+			
 #if RENDERMODE==0
-			if(((Cell*)automat->readCells[i][j])->state!=GRASS)
+			if(c->state!=GRASS)
 #endif			
 			{															//draw cell only if camera sees, wouldn't make sense else
 				if(abs(hnav_MouseToWorldCoordX(hrend.width/2)-i)<hnav_MouseToWorldCoordX(hrend.width/2)-hnav_MouseToWorldCoordX(0) 	
 				&& abs(hnav_MouseToWorldCoordY(hrend.height/2)-j)<hnav_MouseToWorldCoordY(0)-hnav_MouseToWorldCoordY(hrend.height/2))
 				{															//select color and draw
-					hrend_SelectColor(0.5+((Cell*)automat->readCells[i][j])->height/20.0,0.6+((Cell*)automat->readCells[i][j])->height/20.0,0.2+((Cell*)automat->readCells[i][j])->height/20.0+((Cell*)automat->readCells[i][j])->wateramount/5.0,1);
-					hrend_DrawObj(i,j,0,0.5,1,((Cell*)automat->readCells[i][j])->state);
+					int grass_around=NeighborsValue(op_plus,being_a,GRASS);
+					hrend_SelectColor(0.5+c->height/20.0,0.6+c->height/20.0,0.2+c->height/20.0+c->wateramount/5.0,1);
+					if(c->state==WATER && grass_around>=3)
+					{
+						if(grass_around>=8)
+						{
+							hrend_DrawObj(i,j,0,0.5,1,GRASS_A);
+						}
+						else
+						if(readcells[i+1][j]->state==GRASS && readcells[i][j+1]->state==GRASS)
+						{
+							hrend_DrawObj(i,j,0,0.5,1,GRASS_RT);
+						}
+						else
+						if(readcells[i-1][j]->state==GRASS && readcells[i][j-1]->state==GRASS)
+						{
+							hrend_DrawObj(i,j,0,0.5,1,GRASS_LD);
+						}
+						else
+						if(readcells[i+1][j]->state==GRASS && readcells[i][j-1]->state==GRASS)
+						{
+							hrend_DrawObj(i,j,0,0.5,1,GRASS_RD);
+						}
+						else
+						if(readcells[i-1][j]->state==GRASS && readcells[i][j+1]->state==GRASS)
+						{
+							hrend_DrawObj(i,j,0,0.5,1,GRASS_LT);
+						}
+						else
+						if(readcells[i+1][j]->state==GRASS)
+						{
+							hrend_DrawObj(i,j,0,0.5,1,GRASS_R);
+						}
+						else
+						if(readcells[i-1][j]->state==GRASS)
+						{
+							hrend_DrawObj(i,j,0,0.5,1,GRASS_L);
+						}
+						else
+						if(readcells[i][j+1]->state==GRASS)
+						{
+							hrend_DrawObj(i,j,0,0.5,1,GRASS_T);
+						}
+						else
+						if(readcells[i][j-1]->state==GRASS)
+						{
+							hrend_DrawObj(i,j,0,0.5,1,GRASS_D);
+						}
+						else
+						{
+							hrend_DrawObj(i,j,0,0.5,1,GRASS);
+						}
+					}
+					else
+						hrend_DrawObj(i,j,0,0.5,1,c->state);
 				}
 			}
 		}
@@ -176,7 +229,7 @@ void mouse_down(EventArgs *e)
 	{
 		if(e->mk==1)
 		{
-			SetCell(i,j,Cell,state,type);								//set the cell to the selected type on left mouse
+			SetCell(i,j,Cell,state,type); SetCell(i,j,Cell,rootwater,NULL);	//set the cell to the selected type on left mouse
 		}																
 	}
 }
@@ -224,11 +277,11 @@ void GenerateNature()
 	{
 		for(j=2;j<worldsize-2;j++)										//the grid
 		{	
-			if(frnd()>0.9998)											
+			if(drnd()>0.999965)											
 			{
 				SetCell(i,j,Cell,state,WATER);							//maybe place some water
 			}
-			if(frnd()>0.9990)
+			if(drnd()>0.9990)
 			{
 				SetCell(i,j,Cell,state,FOREST);							//maybe some forest
 				SetCell(i+1,j,Cell,state,FOREST);
@@ -247,6 +300,15 @@ void init()
 	hfio_LoadTex("rock.tga",&ROCK);										//load rock texture
 	hfio_LoadTex("water.tga",&WATER);									//load water texture
 	hfio_LoadTex("grass.tga",&GRASS);									//load grass texture
+	hfio_LoadTex("water_grass_right.tga",&GRASS_L);						//load grass texture
+	hfio_LoadTex("water_grass_down.tga",&GRASS_T);						//load grass texture
+	hfio_LoadTex("water_grass_left.tga",&GRASS_R);						//load grass texture
+	hfio_LoadTex("water_grass_top.tga",&GRASS_D);						//load grass texture
+	hfio_LoadTex("water_grass_left_down.tga",&GRASS_RT);				//load grass texture
+	hfio_LoadTex("water_grass_left_top.tga",&GRASS_RD);					//load grass texture
+	hfio_LoadTex("water_grass_right_down.tga",&GRASS_LT);				//load grass texture
+	hfio_LoadTex("water_grass_right_top.tga",&GRASS_LD);				//load grass texture
+	hfio_LoadTex("water_grass_around.tga",&GRASS_A);					//load grass texture
 #if RENDERMODE==2 || RENDERMODE==3
 #if RENDERMODE==2
 	shader=hshade_CreateShaderPair("vertexshader","pixelshader");  		//load pixel (and vertex) shader	
@@ -281,7 +343,7 @@ void init()
 	hinput_AddKeyUp(key_up);											//add key up event
 	type=GRASS;															//set default object to place on click to grass
 	srand(999);															//random generator seed. use current time and world will be different on every execution
-	landscape=GeneratePerlinNoise(worldsize,worldsize,WhiteNoise(worldsize,worldsize),8);	//generate landscape
+	landscape=GeneratePerlinNoise(worldsize,worldsize,WhiteNoise(worldsize,worldsize),8,3);	//generate landscape
 	automat=Hauto_OBJ_NEW(10,worldsize,Simulate,Cell_NEW);				//create cellular automat object
 	GenerateNature();													//generate the nature on it
 	Thread_NEW(Automat_Thread,NULL);									//create a thread for the automat where it can execute on its own core then

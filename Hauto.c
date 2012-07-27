@@ -72,6 +72,7 @@ void *Hauto_OBJ_FirstNeighbor(int i,int j,void ***readCells,float (*Neighbor_Val
 			}
 		}
 	}
+	return NULL;
 }
 ///////////STANDARD-MODULE-FUNCTIONS///////////
 void hauto_INIT()

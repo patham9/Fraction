@@ -57,7 +57,7 @@ float** GenerateSmoothNoise(int baseNoiseLen, int baseNoiseLen0,float** baseNois
    }
    return smoothNoise;
 }
-float** GeneratePerlinNoise(int baseNoiseLen, int baseNoiseLen0,float** baseNoise, int octaveCount)
+float** GeneratePerlinNoise(int baseNoiseLen, int baseNoiseLen0,float** baseNoise, int octaveCount,int minOctave) //minOctave>=0
 {
    int i,j,octave,width=baseNoiseLen,height=baseNoiseLen0;
    float ***smoothNoise=(float***)malloc(octaveCount*sizeof(float**)); //an array of 2D arrays containing
@@ -71,7 +71,7 @@ float** GeneratePerlinNoise(int baseNoiseLen, int baseNoiseLen0,float** baseNois
    float amplitude=1.0f;
    float totalAmplitude=0.0f;
    //blend noise together
-   for (octave=octaveCount-1;octave>=0;octave--)
+   for (octave=octaveCount-1;octave>=minOctave;octave--)
    {
       amplitude *= persistance;
       totalAmplitude += amplitude;
