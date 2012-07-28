@@ -307,7 +307,7 @@ void init()
 {			
 	uint i,j,shader;
 	hfio_LoadTex("forest.tga",&FOREST);									//load forest texture
-	hfio_LoadTex("city.tga",&CITY);										//load city texture
+	hfio_LoadTex("house.tga",&CITY);										//load city texture
 	hfio_LoadTex("rock.tga",&ROCK);										//load rock texture
 	hfio_LoadTex("water.tga",&WATER);									//load water texture
 	hfio_LoadTex("grass.tga",&GRASS);									//load grass texture
