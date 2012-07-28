@@ -37,6 +37,7 @@ float rand() 															//random with time, maybe no usage
 }
 void main()
 { 
+	float step=1.0/((float)worldsize);
 	float state=texture2D(data, texture_coordinate).r;
 	float lastchange=1.0/texture2D(data, texture_coordinate).g-0.1;
 	float height=(1.0/texture2D(data, texture_coordinate).b-0.1)/10.0;
@@ -60,7 +61,52 @@ void main()
 	}
 	if(abs(state-WATER)<0.01)
 	{
+		vec2 tc=texture_coordinate;
+		float state_r=texture2D(data, vec2(texture_coordinate.x+step,texture_coordinate.y)).r;
+		float state_l=texture2D(data, vec2(texture_coordinate.x-step,texture_coordinate.y)).r;
+		float state_t=texture2D(data, vec2(texture_coordinate.x,texture_coordinate.y+step)).r;
+		float state_d=texture2D(data, vec2(texture_coordinate.x,texture_coordinate.y-step)).r;
+		float state_rd=texture2D(data, vec2(texture_coordinate.x+step,texture_coordinate.y-step)).r;
+		float state_ld=texture2D(data, vec2(texture_coordinate.x-step,texture_coordinate.y-step)).r;
+		float state_rt=texture2D(data, vec2(texture_coordinate.x+step,texture_coordinate.y+step)).r;
+		float state_lt=texture2D(data, vec2(texture_coordinate.x-step,texture_coordinate.y+step)).r;
+		float distance=999;
+		if(abs(state_r-GRASS)<0.01)
+		{
+			distance=min(distance, (tc.x/(float)step-(int)(tc.x/(float)step)) );
+		}
+		if(abs(state_l-GRASS)<0.01)
+		{
+			distance=min(distance, (1-(tc.x/(float)step-(int)(tc.x/(float)step))) );
+		}
+		if(abs(state_t-GRASS)<0.01)
+		{
+			distance=min(distance, (tc.y/(float)step-(int)(tc.y/(float)step)) );
+		}
+		if(abs(state_d-GRASS)<0.01)
+		{
+			distance=min(distance, (1-(tc.y/(float)step-(int)(tc.y/(float)step))) );
+		}
+		if(abs(state_l-WATER) && abs(state_d-WATER) && abs(state_ld-GRASS)<0.01)
+		{
+			distance=sqrt(pow(1-(tc.x/(float)step-(int)(tc.x/(float)step)),2)+pow(1-((tc.y/(float)step-(int)(tc.y/(float)step))),2))/1.3;
+		}
+		if(abs(state_r-WATER) && abs(state_d-WATER) && abs(state_rd-GRASS)<0.01)
+		{
+			distance=sqrt(pow((tc.x/(float)step-(int)(tc.x/(float)step)),2)+pow(1-((tc.y/(float)step-(int)(tc.y/(float)step))),2))/1.3;
+		}
+		if(abs(state_r-WATER) && abs(state_t-WATER) && abs(state_rt-GRASS)<0.01)
+		{
+			distance=sqrt(pow((tc.x/(float)step-(int)(tc.x/(float)step)),2)+pow(((tc.y/(float)step-(int)(tc.y/(float)step))),2))/1.3;
+		}
+		if(abs(state_l-WATER) && abs(state_t-WATER) && abs(state_lt-GRASS)<0.01)
+		{
+			distance=sqrt(pow(1-(tc.x/(float)step-(int)(tc.x/(float)step)),2)+pow(((tc.y/(float)step-(int)(tc.y/(float)step))),2))/1.3;
+		}
+		if(distance==999)
 		gl_FragColor=texture2D(water_texture, texture_coordinate*worldsize);
+		else
+		gl_FragColor=(1-distance)*texture2D(water_texture, texture_coordinate*worldsize)+distance*texture2D(grass_texture, texture_coordinate*worldsize);
 	}
 	gl_FragColor*=color;
 	if(abs(state-WATER)<0.01)											//water shader
@@ -69,7 +115,7 @@ void main()
     }
     if(abs(state-WATER)<0.01 && lastchange<4)							//it became water not long ago, so make noise/shore
     {
-		gl_FragColor+=0.1*rand();
+		gl_FragColor+=0.05*rand();
     }
 	//gl_FragColor=texture2D(data, texture_coordinate);					//debug view if you want :D
 }
