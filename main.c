@@ -3,9 +3,9 @@
 #define RENDERMODE 2	//(0 and 2 recommended))						//0 slow GPU, 1 GPU (hm nearly only disadvantages at the moment but let it in for performance measurement reasons, 2 pixelshader, 3 3D pixelshader
 
 static uint worldsize=512;												//so the cellular automat grid will be 500x500								
-uint STREET=0,ROCK=1,FOREST=2,CITY=3,WATER=4,GRASS=-1,GRASS_R,GRASS_L,GRASS_T,GRASS_D,GRASS_A,GRASS_RT,GRASS_LT,GRASS_LD,GRASS_RD,GPUTex;//indexes for textures and cell states in one
+uint STREET=1,ROCK=2,FOREST=3,CITY=4,WATER=5,GRASS=-1,GRASS_R,GRASS_L,GRASS_T,GRASS_D,GRASS_A,GRASS_RT,GRASS_LT,GRASS_LD,GRASS_RD,GPUTex;//indexes for textures and cell states in one
 uint type;																//the cell type currently selected with the keys placed on mouse click
-uint shader_state,shader_wateramount,shader_height,shader_i,shader_j,shader_t,shader_lastchange,shader_difx,shader_dify,shader_zoom;//shader uniform variables to the GPU
+uint shader_state,shader_wateramount,shader_height,shader_i,shader_j,shader_t,shader_lastchange,shader_px,shader_py,shader_zoom;//shader uniform variables to the GPU
 Hauto_OBJ *automat;														//the "object" simulating the cellular grid with its rules
 float **landscape;														//initially storing generated height information for the landscape
 
@@ -105,8 +105,8 @@ void draw()
 #if RENDERMODE!=1
 #if RENDERMODE!=0
 	glUniform1f(shader_t,(float)glfwGetTime());							//set shader time
-	glUniform1f(shader_difx,hnav.difx);
-	glUniform1f(shader_dify,hnav.dify);					
+	glUniform1f(shader_px,hnav_MouseToWorldCoordX(hrend.width/2));
+	glUniform1f(shader_py,hnav_MouseToWorldCoordY(hrend.height/2));					
 	glUniform1f(shader_zoom,hnav.zoom);
 #endif
 	glActiveTexture(GL_TEXTURE0);										//give data to GPU
@@ -315,9 +315,9 @@ void init()
 	uint i,j,shader;
 	hfio_LoadTex("forest.tga",&FOREST);									//load forest texture
 	hfio_LoadTex("house.tga",&CITY);									//load city texture
-	hfio_LoadTex("street.tga",&STREET);									//load street texture
 	hfio_LoadTex("rock.tga",&ROCK);										//load rock texture
 	hfio_LoadTex("water.tga",&WATER);									//load water texture
+	hfio_LoadTex("street.tga",&STREET);									//load street texture
 	hfio_LoadTex("grass.tga",&GRASS);									//load grass texture
 	hfio_LoadTex("water_grass_right.tga",&GRASS_L);						//load grass texture
 	hfio_LoadTex("water_grass_down.tga",&GRASS_T);						//load grass texture
@@ -345,8 +345,8 @@ void init()
 	glUniform1i(glGetUniformLocation(shader, "street_texture"), 5);
 	glUniform1i(glGetUniformLocation(shader, "water_texture"), 6);
 	shader_t=glGetUniformLocation(shader, "t");							//time
-	shader_difx=glGetUniformLocation(shader, "difx");
-	shader_dify=glGetUniformLocation(shader, "dify");
+	shader_px=glGetUniformLocation(shader, "px");
+	shader_py=glGetUniformLocation(shader, "py");
 	shader_zoom=glGetUniformLocation(shader, "zoom");
 	glUniform1f(glGetUniformLocation(shader, "ROCK"),1.0/(float)ROCK);				//make GPU know of our state constants
 	glUniform1f(glGetUniformLocation(shader, "FOREST"),1.0/(float)FOREST);			

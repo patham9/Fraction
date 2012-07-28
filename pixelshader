@@ -4,12 +4,11 @@ uniform sampler2D grass_texture;
 uniform sampler2D city_texture;
 uniform sampler2D forest_texture;
 uniform sampler2D rock_texture;
-uniform sampler2D water_texture;
 uniform sampler2D street_texture;
-
+uniform sampler2D water_texture;
 
 //lets read this additional variables from the CPU (ram)
-uniform float t,difx,dify,zoom;														
+uniform float t,px,py,zoom;														
 uniform float ROCK,FOREST,CITY,WATER,GRASS,STREET;								//constants we need to work with
 uniform int worldsize;
 
