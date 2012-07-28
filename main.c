@@ -1,9 +1,9 @@
 #include "Hamlib.h"														//hamlib include
 #include "PerlinNoise.h"												//perlin noise generator include
-#define RENDERMODE 2	//(0 and 2 recommended))						//0 slow GPU, 1 GPU (hm nearly only disadvantages at the moment but let it in for performance measurement reasons, 2 pixelshader, 3 3D pixelshader
+#define RENDERMODE 0	//(0 and 2 recommended))						//0 slow GPU, 1 GPU (hm nearly only disadvantages at the moment but let it in for performance measurement reasons, 2 pixelshader, 3 3D pixelshader
 
 static uint worldsize=512;												//so the cellular automat grid will be 500x500								
-uint STREET=1,ROCK=2,FOREST=3,CITY=4,WATER=5,GRASS=-1,GRASS_R,GRASS_L,GRASS_T,GRASS_D,GRASS_A,GRASS_RT,GRASS_LT,GRASS_LD,GRASS_RD,GPUTex;//indexes for textures and cell states in one
+uint STREET=1,ROCK=2,FOREST=3,CITY=4,WATER=5,GRASS=-1,GRASS_R,GRASS_L,GRASS_T,GRASS_D,GRASS_A,GRASS_RT,GRASS_LT,GRASS_LD,GRASS_RD,GPUTex,MEN;//indexes for textures and cell states in one
 uint type;																//the cell type currently selected with the keys placed on mouse click
 uint shader_state,shader_wateramount,shader_height,shader_i,shader_j,shader_t,shader_lastchange,shader_px,shader_py,shader_zoom;//shader uniform variables to the GPU
 Hauto_OBJ *automat;														//the "object" simulating the cellular grid with its rules
@@ -19,7 +19,98 @@ typedef struct
 	float wateramount;													//ground water
 	void *rootwater;													//root pointer (from which water cell does the water cell come from)
 	float height;														//the height of the cell, at first resulting from the landscape, but can change then
+	int wood;															//city resource
+	int meat;															//city resource
 }Cell;
+
+typedef struct
+{
+	float x;
+	float y;
+	float targetx;
+	float targety;
+	int dead;
+	int workstate;
+	int wood;
+}Men;
+int maxmen=1000;
+Men **men;
+int meni=0;
+void Men_SetNextTarget(Men *men,int state, Cell ***readcells)
+{
+	int i,j;
+	int besti=0,bestj=0;
+	float bestdist=99999;
+	for(i=0;i<worldsize;i++)
+	{
+		for(j=0;j<worldsize;j++)
+		{
+			if(readcells[i][j]->state==state)
+			{
+				float dist=sqrt(pow(men->x-i,2)+pow(men->y-j,2));
+				if(dist<bestdist)
+				{
+					bestdist=dist;
+					besti=i;
+					bestj=j;
+				}
+			}
+		}
+	}
+	men->targetx=besti+0.5;
+	men->targety=bestj+0.5;
+}
+void Men_Add(float x,float y,Cell ***readcells)
+{
+	if(meni>=maxmen){return;}
+	men[meni]=(Men*)malloc(sizeof(Men));
+	men[meni]->x=x;
+	men[meni]->y=y;
+	
+	Men_SetNextTarget(men[meni],FOREST,readcells);						//add first he has to find wood
+	men[meni]->dead=0;
+	men[meni]->workstate=0;
+	men[meni]->wood=0;
+	meni++;
+}
+void Men_Execute(Men* men,Cell ***readcells)
+{
+	int x=(int)(men->x);
+	int y=(int)(men->y);
+	int tx=(int)(men->targetx);
+	int ty=(int)(men->targety);
+	if(men->workstate==0 && readcells[tx][ty]->state!=FOREST)			//he has workstate 0 so he is a wood feller and needs to find wood
+	{
+		Men_SetNextTarget(men,FOREST,readcells);
+	}
+	if(men->workstate==1 && readcells[tx][ty]->state!=FOREST) 			//he has workstate 1 so he is a wood feller who found wood so return
+	{
+		Men_SetNextTarget(men,CITY,readcells);
+	}
+	if(men->workstate==0 && readcells[x][y]->state==FOREST)				//he was wood feller and found wood
+	{
+		Men_SetNextTarget(men,CITY,readcells);
+		men->wood=100;
+		men->workstate+=1;
+		SetCell((int)men->x,(int)men->y,Cell,state,GRASS);
+	}
+	if(men->workstate==1 && readcells[(int)(men->x)][(int)(men->y)]->state==CITY) 	//he was wood feller who found wood and returned home
+	{
+		SetCell(x,y,Cell,wood,GetCell(x,y,Cell,wood)+men->wood);
+		SetCell(x,y,Cell,meat,GetCell(x,y,Cell,meat)+100);
+		men->wood=0;
+		men->dead=1;
+	}
+	else
+	{
+		float speed=0.01;
+		float dx=men->targetx-men->x;
+		float dy=men->targety-men->y;
+		float a=atan2(dy,dx);
+		men->x+=speed*cos(a);
+		men->y+=speed*sin(a);
+	}
+}
 
 Cell *Cell_NEW(int i,int j) 		 									//constructor for a new cell called for every cell when the automat constructor is called
 {
@@ -29,9 +120,11 @@ Cell *Cell_NEW(int i,int j) 		 									//constructor for a new cell called for 
 	ret->lastchange=0;													//
 	ret->rootwater=NULL;												//no root pointer
 	ret->height=landscape[i][j]*10.0;									//setting height to the landscape height at current position
+	ret->wood=0;
+	ret->meat=120;
 	return ret;															//return our created object
 }
-float being_a(Cell *c,int state)									//a function returning true if the state of cell c equals state else false
+float being_a(Cell *c,int state)										//a function returning true if the state of cell c equals state else false
 {
 	return c->state==state;
 }
@@ -72,6 +165,39 @@ void Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* righ
 		writeme->rootwater=NULL; 
 		writeme->lastchange=0;
 	}
+	if(readme->state==GRASS)											//grass with a city near gets city if neighbour citys have enough wood
+	{
+		int buildingCost=200;
+		float wood(Cell *c,void *z)
+		{
+			return c->wood;
+		}
+		float same_amount_of_wood(Cell *c,float wood)
+		{
+			return c->wood==wood;
+		}
+		float maxWood=NeighborsValue(op_max,wood,NULL);
+		if(maxWood>=buildingCost)
+		{
+			if(drnd()>0.5)
+			{
+				writeme->state=CITY;
+			}
+			else
+			{
+				writeme->state=STREET;
+			}
+		}
+	}
+	if(frnd()>0.95 && readme->state==CITY && readme->meat>=100) //it can happen than a men gets born here if enough meat is in the city, but that costs meat
+	{
+		writeme->meat=max(0,readme->meat-100);
+		Men_Add(i,j,readcells);
+	}
+	if(readme->state==CITY)
+	{
+		writeme->meat=readme->meat-10;	//city needs meat
+	}
 }
 
 float *toGPU; //2D array of state, lastchange, height, wateramount
@@ -94,7 +220,7 @@ void draw()
 			toGPU[k]=1.0/(0.1+(float)c->wateramount); k++;
 #endif
 #if RENDERMODE==0
-			toGPU[k]=0.5+((Cell*)automat->readCells[i][j])->height/20.0; k++;									//use texture for rendering instead in mode 0
+			toGPU[k]=0.5+((Cell*)automat->readCells[i][j])->height/20.0; k++;	//use texture for rendering instead in mode 0
 			toGPU[k]=0.6+((Cell*)automat->readCells[i][j])->height/20.0; k++;
 			toGPU[k]=0.2+((Cell*)automat->readCells[i][j])->height/20.0+((Cell*)automat->readCells[i][j])->wateramount/5.0; k++;
 			toGPU[k]=1.0; k++;
@@ -225,6 +351,14 @@ void draw()
 		}
 	}
 #endif
+	for(i=0;i<meni;i++)
+	{
+		if(men[i]->dead==0)
+		{
+			Men_Execute(men[i],automat->readCells);
+			hrend_DrawObj(men[i]->x,men[i]->y,0,0.5,1,MEN);
+		}
+	}
 	Wait(0.001);
 }
 
@@ -243,11 +377,9 @@ void mouse_down(EventArgs *e)
 void key_up(EventArgs*e) 
 {
 	if (e->mk=='X')
-	{
-		// running will end the main loop of the thread
-		// then we wait and exit normally
-		running = 0;
-		glfwWaitThread(thread, 0);
+	{													
+		running = 0;													// running will end the main loop of the thread
+		glfwWaitThread(thread, 0);										// then we wait and exit normally
 		exit(0);
 	}
 	if(e->mk=='W')														
@@ -313,6 +445,7 @@ void GenerateNature()
 void init()  
 {			
 	uint i,j,shader;
+	hfio_LoadTex("man.tga",&MEN);										//load forest texture
 	hfio_LoadTex("forest.tga",&FOREST);									//load forest texture
 	hfio_LoadTex("house.tga",&CITY);									//load city texture
 	hfio_LoadTex("rock.tga",&ROCK);										//load rock texture
@@ -356,6 +489,7 @@ void init()
 	glUniform1f(glGetUniformLocation(shader, "STREET"),1.0/(float)STREET);
 	glUniform1i(glGetUniformLocation(shader, "worldsize"),worldsize);	
 #endif
+	men=(Men**)malloc(maxmen*sizeof(Men*));
 	toGPU=(float*)malloc(worldsize*worldsize*4*sizeof(float));	
 	hnav_SetRendFunc(draw);												//set hamlib render routine
 	hrend_2Dmode(0.5,0.6,0.5);											//set hamlib render mode to 2D
