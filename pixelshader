@@ -5,10 +5,12 @@ uniform sampler2D city_texture;
 uniform sampler2D forest_texture;
 uniform sampler2D rock_texture;
 uniform sampler2D water_texture;
+uniform sampler2D street_texture;
+
 
 //lets read this additional variables from the CPU (ram)
 uniform float t,difx,dify,zoom;														
-uniform float ROCK,FOREST,CITY,WATER,GRASS;								//constants we need to work with
+uniform float ROCK,FOREST,CITY,WATER,GRASS,STREET;								//constants we need to work with
 uniform int worldsize;
 
 float randgen(float x)
@@ -58,6 +60,10 @@ void main()
 	if(abs(state-FOREST)<0.01)
 	{
 		gl_FragColor=texture2D(forest_texture, texture_coordinate*worldsize);
+	}
+	if(abs(state-STREET)<0.01)
+	{
+		gl_FragColor=texture2D(street_texture, texture_coordinate*worldsize);
 	}
 	if(abs(state-WATER)<0.01)
 	{

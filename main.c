@@ -1,9 +1,9 @@
 #include "Hamlib.h"														//hamlib include
 #include "PerlinNoise.h"												//perlin noise generator include
-#define RENDERMODE 0	//(0 and 2 recommended))						//0 slow GPU, 1 GPU (hm nearly only disadvantages at the moment but let it in for performance measurement reasons, 2 pixelshader, 3 3D pixelshader
+#define RENDERMODE 2	//(0 and 2 recommended))						//0 slow GPU, 1 GPU (hm nearly only disadvantages at the moment but let it in for performance measurement reasons, 2 pixelshader, 3 3D pixelshader
 
 static uint worldsize=512;												//so the cellular automat grid will be 500x500								
-uint ROCK=1,FOREST=2,CITY=3,WATER=4,GRASS=-1,GRASS_R,GRASS_L,GRASS_T,GRASS_D,GRASS_A,GRASS_RT,GRASS_LT,GRASS_LD,GRASS_RD,GPUTex;//indexes for textures and cell states in one
+uint STREET=0,ROCK=1,FOREST=2,CITY=3,WATER=4,GRASS=-1,GRASS_R,GRASS_L,GRASS_T,GRASS_D,GRASS_A,GRASS_RT,GRASS_LT,GRASS_LD,GRASS_RD,GPUTex;//indexes for textures and cell states in one
 uint type;																//the cell type currently selected with the keys placed on mouse click
 uint shader_state,shader_wateramount,shader_height,shader_i,shader_j,shader_t,shader_lastchange,shader_difx,shader_dify,shader_zoom;//shader uniform variables to the GPU
 Hauto_OBJ *automat;														//the "object" simulating the cellular grid with its rules
@@ -140,6 +140,9 @@ void draw()
 	glBindTexture(GL_TEXTURE_2D,ROCK);
 	glActiveTexture(GL_TEXTURE5);
 	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D,STREET);
+	glActiveTexture(GL_TEXTURE6);
+	glEnable(GL_TEXTURE_2D);
 	hrend_DrawObj(worldsize/2-0.25,worldsize/2-0.25,0,worldsize/2,1,WATER);
 #endif
 #endif
@@ -267,6 +270,10 @@ void key_up(EventArgs*e)
 	{
 		type=GRASS;														//select the types for the placement of objects with keys
 	}
+	if(e->mk=='S')														
+	{
+		type=STREET;													//select the types for the placement of objects with keys
+	}
 }
 
 void Automat_Thread()
@@ -307,7 +314,8 @@ void init()
 {			
 	uint i,j,shader;
 	hfio_LoadTex("forest.tga",&FOREST);									//load forest texture
-	hfio_LoadTex("house.tga",&CITY);										//load city texture
+	hfio_LoadTex("house.tga",&CITY);									//load city texture
+	hfio_LoadTex("street.tga",&STREET);									//load street texture
 	hfio_LoadTex("rock.tga",&ROCK);										//load rock texture
 	hfio_LoadTex("water.tga",&WATER);									//load water texture
 	hfio_LoadTex("grass.tga",&GRASS);									//load grass texture
@@ -334,7 +342,8 @@ void init()
 	glUniform1i(glGetUniformLocation(shader, "city_texture"), 2);
 	glUniform1i(glGetUniformLocation(shader, "forest_texture"), 3);
 	glUniform1i(glGetUniformLocation(shader, "rock_texture"), 4);
-	glUniform1i(glGetUniformLocation(shader, "water_texture"), 5);
+	glUniform1i(glGetUniformLocation(shader, "street_texture"), 5);
+	glUniform1i(glGetUniformLocation(shader, "water_texture"), 6);
 	shader_t=glGetUniformLocation(shader, "t");							//time
 	shader_difx=glGetUniformLocation(shader, "difx");
 	shader_dify=glGetUniformLocation(shader, "dify");
@@ -344,6 +353,7 @@ void init()
 	glUniform1f(glGetUniformLocation(shader, "CITY"),1.0/(float)CITY);
 	glUniform1f(glGetUniformLocation(shader, "WATER"),1.0/(float)WATER);
 	glUniform1f(glGetUniformLocation(shader, "GRASS"),1.0/(float)GRASS);
+	glUniform1f(glGetUniformLocation(shader, "STREET"),1.0/(float)STREET);
 	glUniform1i(glGetUniformLocation(shader, "worldsize"),worldsize);	
 #endif
 	toGPU=(float*)malloc(worldsize*worldsize*4*sizeof(float));	
