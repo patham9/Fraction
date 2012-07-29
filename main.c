@@ -20,9 +20,18 @@ typedef struct
 	void *rootwater;													//root pointer (from which water cell does the water cell come from)
 	float height;														//the height of the cell, at first resulting from the landscape, but can change then
 	int wood;															//city resource
-	int meat;															//city resource
 }Cell;
-
+Cell *Cell_NEW(int i,int j) 		 									//constructor for a new cell called for every cell when the automat constructor is called
+{
+	Cell *ret=(Cell*)malloc(sizeof(Cell));								//allocating memory for the Cell pointer
+	ret->state=GRASS;													//setting default state to GRASS
+	ret->wateramount=0;													//no ground water by default
+	ret->lastchange=0;													//
+	ret->rootwater=NULL;												//no root pointer
+	ret->height=landscape[i][j]*10.0;									//setting height to the landscape height at current position
+	ret->wood=0;
+	return ret;															//return our created object
+}
 typedef struct
 {
 	float x;
@@ -57,8 +66,8 @@ void Men_SetNextTarget(Men *men,int state, Cell ***readcells)
 			}
 		}
 	}
-	men->targetx=besti+0.5;
-	men->targety=bestj+0.5;
+	men->targetx=besti;
+	men->targety=bestj;
 }
 void Men_Add(float x,float y,Cell ***readcells)
 {
@@ -66,8 +75,6 @@ void Men_Add(float x,float y,Cell ***readcells)
 	men[meni]=(Men*)malloc(sizeof(Men));
 	men[meni]->x=x;
 	men[meni]->y=y;
-	
-	Men_SetNextTarget(men[meni],FOREST,readcells);						//add first he has to find wood
 	men[meni]->dead=0;
 	men[meni]->workstate=0;
 	men[meni]->wood=0;
@@ -75,10 +82,15 @@ void Men_Add(float x,float y,Cell ***readcells)
 }
 void Men_Execute(Men* men,Cell ***readcells)
 {
-	int x=(int)(men->x);
-	int y=(int)(men->y);
+	int x=(int)(men->x+0.5);
+	int y=(int)(men->y+0.5);
 	int tx=(int)(men->targetx);
 	int ty=(int)(men->targety);
+	if(readcells[x][y]->state==ROCK || readcells[x][y]->state==WATER)
+	{
+		men->dead=1;
+		return;
+	}
 	if(men->workstate==0 && readcells[tx][ty]->state!=FOREST)			//he has workstate 0 so he is a wood feller and needs to find wood
 	{
 		Men_SetNextTarget(men,FOREST,readcells);
@@ -92,12 +104,11 @@ void Men_Execute(Men* men,Cell ***readcells)
 		Men_SetNextTarget(men,CITY,readcells);
 		men->wood=100;
 		men->workstate+=1;
-		SetCell((int)men->x,(int)men->y,Cell,state,GRASS);
+		SetCell(x,y,Cell,state,GRASS);
 	}
-	if(men->workstate==1 && readcells[(int)(men->x)][(int)(men->y)]->state==CITY) 	//he was wood feller who found wood and returned home
+	if(men->workstate==1 && readcells[x][y]->state==CITY) 				//he was wood feller who found wood and returned home
 	{
 		SetCell(x,y,Cell,wood,GetCell(x,y,Cell,wood)+men->wood);
-		SetCell(x,y,Cell,meat,GetCell(x,y,Cell,meat)+100);
 		men->wood=0;
 		men->dead=1;
 	}
@@ -110,19 +121,6 @@ void Men_Execute(Men* men,Cell ***readcells)
 		men->x+=speed*cos(a);
 		men->y+=speed*sin(a);
 	}
-}
-
-Cell *Cell_NEW(int i,int j) 		 									//constructor for a new cell called for every cell when the automat constructor is called
-{
-	Cell *ret=(Cell*)malloc(sizeof(Cell));								//allocating memory for the Cell pointer
-	ret->state=GRASS;													//setting default state to GRASS
-	ret->wateramount=0;													//no ground water by default
-	ret->lastchange=0;													//
-	ret->rootwater=NULL;												//no root pointer
-	ret->height=landscape[i][j]*10.0;									//setting height to the landscape height at current position
-	ret->wood=0;
-	ret->meat=120;
-	return ret;															//return our created object
 }
 float being_a(Cell *c,int state)										//a function returning true if the state of cell c equals state else false
 {
@@ -148,7 +146,7 @@ void Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* righ
 	{
 		writeme->wateramount=9*NeighborsValue(op_max,water_amount,NULL)/10; 
 	} 
-	if(readme->state==GRASS && NeighborsValue(op_plus,being_a,FOREST)==3 && NeighborsValue(op_plus,water_amount,NULL)/N>0.1) //(t%10==0 && .. to make it slower) also try 2 instead 3
+	if(t%100==0 && readme->state==GRASS && NeighborsValue(op_plus,being_a,FOREST)==3 && NeighborsValue(op_plus,water_amount,NULL)/N>0.1) //also try 2 instead 3
 	{
 		writeme->state=FOREST;											//a cell which is grass and has 3 wood neighbours and enough ground water becomes forest
 		writeme->lastchange=0;
@@ -177,11 +175,17 @@ void Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* righ
 			return c->wood==wood;
 		}
 		float maxWood=NeighborsValue(op_max,wood,NULL);
-		if(maxWood>=buildingCost)
+		if(maxWood>=buildingCost && t%100==0)
 		{
-			if(drnd()>0.5)
+			float value=frnd();
+			if(value>0.5)
 			{
 				writeme->state=CITY;
+			}
+			else
+			if(value<0.15)
+			{
+				writeme->state=ROCK;
 			}
 			else
 			{
@@ -189,14 +193,9 @@ void Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* righ
 			}
 		}
 	}
-	if(frnd()>0.95 && readme->state==CITY && readme->meat>=100) //it can happen than a men gets born here if enough meat is in the city, but that costs meat
+	if(t%100==0 && readme->state==CITY) //it can happen than a men gets born here
 	{
-		writeme->meat=max(0,readme->meat-100);
 		Men_Add(i,j,readcells);
-	}
-	if(readme->state==CITY)
-	{
-		writeme->meat=readme->meat-10;	//city needs meat
 	}
 }
 
@@ -352,8 +351,10 @@ void draw()
 		}
 	}
 #endif
+#if RENDERMODE>=2
 	glUseProgram(0);													//back to fixed pipeline
 	glActiveTexture(GL_TEXTURE0);										//set texture0
+#endif
 	for(i=0;i<meni;i++)
 	{
 		if(men[i]->dead==0)
@@ -373,6 +374,10 @@ void mouse_down(EventArgs *e)
 		if(e->mk==1)
 		{
 			SetCell(i,j,Cell,state,type); SetCell(i,j,Cell,rootwater,NULL);	//set the cell to the selected type on left mouse
+			if(type==CITY)
+			{
+				Men_Add(i,j,automat->readCells);
+			}
 		}																
 	}
 }
