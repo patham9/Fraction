@@ -175,15 +175,16 @@ void Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* righ
 			return c->wood==wood;
 		}
 		float maxWood=NeighborsValue(op_max,wood,NULL);
+		float waterAround=NeighborsValue(op_plus,being_a,WATER);
 		if(maxWood>=buildingCost && t%100==0)
 		{
 			float value=frnd();
-			if(value>0.5)
+			if(value>0.5 && waterAround==0)
 			{
 				writeme->state=CITY;
 			}
 			else
-			if(value<0.15)
+			if(value<0.13 || waterAround>0)
 			{
 				writeme->state=ROCK;
 			}
@@ -386,9 +387,9 @@ void key_up(EventArgs*e)
 {
 	if (e->mk=='X')
 	{													
-		running = 0;													// running will end the main loop of the thread
-		glfwWaitThread(thread, 0);										// then we wait and exit normally
-		exit(0);
+		//running = 0;													// running will end the main loop of the thread
+		//glfwWaitThread(thread, 0);										// then we wait and exit normally
+		//exit(0);
 	}
 	if(e->mk=='W')														
 	{
