@@ -4,7 +4,7 @@
 
 static uint worldsize=512;												//so the cellular automat grid will be 500x500								
 uint STREET=1,ROCK=2,FOREST=3,CITY=4,WATER=5,GRASS=-1,GRASS_R,GRASS_L,GRASS_T,GRASS_D,GRASS_A,GRASS_RT,GRASS_LT,GRASS_LD,GRASS_RD,GPUTex,MEN;//indexes for textures and cell states in one
-uint type;																//the cell type currently selected with the keys placed on mouse click
+uint type,shader;																//the cell type currently selected with the keys placed on mouse click
 uint shader_state,shader_wateramount,shader_height,shader_i,shader_j,shader_t,shader_lastchange,shader_px,shader_py,shader_zoom;//shader uniform variables to the GPU
 Hauto_OBJ *automat;														//the "object" simulating the cellular grid with its rules
 float **landscape;														//initially storing generated height information for the landscape
@@ -252,6 +252,7 @@ void draw()
 		btoGPU=0; Initial=0;
 	}
 #if RENDERMODE>=2
+	glUseProgram(shader);												//use pixel (and vertex) shader
 	glActiveTexture(GL_TEXTURE1);										//give textures to GPU
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D,GRASS);
@@ -351,6 +352,8 @@ void draw()
 		}
 	}
 #endif
+	glUseProgram(0);													//back to fixed pipeline
+	glActiveTexture(GL_TEXTURE0);										//set texture0
 	for(i=0;i<meni;i++)
 	{
 		if(men[i]->dead==0)
@@ -444,13 +447,13 @@ void GenerateNature()
 
 void init()  
 {			
-	uint i,j,shader;
-	hfio_LoadTex("man.tga",&MEN);										//load forest texture
+	uint i,j;
 	hfio_LoadTex("forest.tga",&FOREST);									//load forest texture
 	hfio_LoadTex("house.tga",&CITY);									//load city texture
 	hfio_LoadTex("rock.tga",&ROCK);										//load rock texture
 	hfio_LoadTex("water.tga",&WATER);									//load water texture
 	hfio_LoadTex("street.tga",&STREET);									//load street texture
+	hfio_LoadTex("man.tga",&MEN);										//load forest texture
 	hfio_LoadTex("grass.tga",&GRASS);									//load grass texture
 	hfio_LoadTex("water_grass_right.tga",&GRASS_L);						//load grass texture
 	hfio_LoadTex("water_grass_down.tga",&GRASS_T);						//load grass texture
@@ -468,8 +471,8 @@ void init()
 #if RENDERMODE==3
 	shader=hshade_CreateShaderPair("vertexshader3d","pixelshader3d");  	//load pixel (and vertex) shader	
 #endif				
-	glUseProgram(shader);												//use pixel (and vertex) shader
 	hfio_LoadTex("grass.tga",&GPUTex);									//ehm
+	glUseProgram(shader);
 	glUniform1i(glGetUniformLocation(shader, "data"), 0);
 	glUniform1i(glGetUniformLocation(shader, "grass_texture"), 1);
 	glUniform1i(glGetUniformLocation(shader, "city_texture"), 2);
