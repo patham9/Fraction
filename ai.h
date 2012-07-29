@@ -29,7 +29,7 @@ void Men_Execute(Men* men,Cell ***readcells)
 	int y=(int)(men->y+0.5);
 	int tx=(int)(men->targetx);
 	int ty=(int)(men->targety);
-	if(readcells[x][y]->state==ROCK || readcells[x][y]->state==WATER)
+	if(x<0 || y<0 || tx<0 || ty<0 || x>=worldsize || y>=worldsize || tx>=worldsize || ty>=worldsize || readcells[x][y]->state==ROCK || readcells[x][y]->state==WATER)
 	{
 		men->dead=1;
 		return;

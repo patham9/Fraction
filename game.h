@@ -35,7 +35,7 @@ int maxmen=1000;
 Men **men;
 int meni=0;
 
-void Men_Add(float x,float y,Cell ***readcells)
+void Men_Add(float x,float y)
 {
 	int i;
 	for(i=0;i<meni;i++)

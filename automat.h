@@ -72,6 +72,6 @@ void Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* righ
 	}
 	if(t%100==0 && readme->state==CITY) //it can happen than a men gets born here
 	{
-		Men_Add(i,j,readcells);
+		Men_Add(i,j);
 	}
 }
