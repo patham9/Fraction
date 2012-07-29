@@ -57,7 +57,7 @@ void Men_Execute(Men* men,Cell ***readcells)
 	}
 	else
 	{
-		float speed=0.01;
+		float speed=0.1;
 		float dx=men->targetx-men->x;
 		float dy=men->targety-men->y;
 		float a=atan2(dy,dx);

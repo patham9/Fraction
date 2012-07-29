@@ -1,8 +1,8 @@
 #include "Hamlib.h"														//hamlib include
 #include "PerlinNoise.h"												//perlin noise generator include
-#define RENDERMODE 0	//(0 and 2 recommended))						//0 slow GPU, 1 GPU (hm nearly only disadvantages at the moment but let it in for performance measurement reasons, 2 pixelshader, 3 3D pixelshader
+#define RENDERMODE 1	//(0 and 2 recommended))						//0 slow GPU, 1 GPU (hm nearly only disadvantages at the moment but let it in for performance measurement reasons, 2 pixelshader, 3 3D pixelshader
 
-static uint worldsize=512;												//so the cellular automat grid will be 500x500								
+static uint worldsize=256;												//so the cellular automat grid will be 500x500								
 uint STREET=1,ROCK=2,FOREST=3,CITY=4,WATER=5,GRASS=-1,GRASS_R,GRASS_L,GRASS_T,GRASS_D,GRASS_A,GRASS_RT,GRASS_LT,GRASS_LD,GRASS_RD,GPUTex,MEN;//indexes for textures and cell states in one
 uint type,shader;														//the cell type currently selected with the keys placed on mouse click
 uint shader_state,shader_wateramount,shader_height,shader_i,shader_j,shader_t,shader_lastchange,shader_px,shader_py,shader_zoom;//shader uniform variables to the GPU

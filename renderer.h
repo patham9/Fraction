@@ -156,7 +156,7 @@ void draw()
 #endif
 	for(i=0;i<meni;i++)
 	{
-		if(men[i]->dead==0)
+		if(men[i]!=NULL && men[i]->dead==0)
 		{
 			Men_Execute(men[i],automat->readCells);
 			hrend_DrawObj(men[i]->x,men[i]->y,0,0.5,1,MEN);

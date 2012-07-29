@@ -7,6 +7,7 @@ typedef struct
 	float height;														//the height of the cell, at first resulting from the landscape, but can change then
 	int wood;															//city resource
 }Cell;
+
 Cell *Cell_NEW(int i,int j) 		 									//constructor for a new cell called for every cell when the automat constructor is called
 {
 	Cell *ret=(Cell*)malloc(sizeof(Cell));								//allocating memory for the Cell pointer
@@ -18,6 +19,7 @@ Cell *Cell_NEW(int i,int j) 		 									//constructor for a new cell called for 
 	ret->wood=0;
 	return ret;															//return our created object
 }
+
 typedef struct
 {
 	float x;
@@ -28,17 +30,33 @@ typedef struct
 	int workstate;
 	int wood;
 }Men;
+
 int maxmen=1000;
 Men **men;
 int meni=0;
+
 void Men_Add(float x,float y,Cell ***readcells)
 {
-	if(meni>=maxmen){return;}
-	men[meni]=(Men*)malloc(sizeof(Men));
-	men[meni]->x=x;
-	men[meni]->y=y;
-	men[meni]->dead=0;
-	men[meni]->workstate=0;
-	men[meni]->wood=0;
-	meni++;
+	int i;
+	for(i=0;i<meni;i++)
+	{
+		if(men[i]==NULL || men[i]->dead==1)
+		{
+			break;
+		}
+		if(i==maxmen-1) //reached the maximum, no add
+		{
+			return;
+		}
+	}
+	if(men[i]==NULL)
+	{
+		men[i]=(Men*)malloc(sizeof(Men));
+	}
+	men[i]->x=x;
+	men[i]->y=y;
+	men[i]->dead=0;
+	men[i]->workstate=0;
+	men[i]->wood=0;
+	meni=min(maxmen,meni+1);
 }
