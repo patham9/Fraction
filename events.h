@@ -6,10 +6,6 @@ void mouse_down(EventArgs *e)
 		if(e->mk==1)
 		{
 			SetCell(i,j,Cell,state,type); SetCell(i,j,Cell,rootwater,NULL);	//set the cell to the selected type on left mouse
-			if(type==CITY)
-			{
-				Men_Add(i,j,automat->readCells);
-			}
 		}																
 	}
 }
