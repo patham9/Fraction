@@ -19,4 +19,4 @@ prog: $(OBJ)
 	$(CC) -w $(CFLAGS) -c $<
 
 clean:
-	rm -rf *.o prog
+	rm -rf *.o prog server
