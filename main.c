@@ -171,6 +171,7 @@ void Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* righ
 		writeme->state=WATER; 											//(water flows downwards) a cell which isn't rock which has neighbors with water on a higher position gets water and remembers a root cell
 		writeme->rootwater=FirstNeighbor(water_and_higher_than,&readme->height);
 		writeme->lastchange=0;
+		writeme->wood=0;    											//wood floated away
 	}
 	if(readme->state==WATER && readme->rootwater!=NULL && ((Cell*)readme->rootwater)->state!=WATER)
 	{
@@ -189,23 +190,27 @@ void Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* righ
 		{
 			return c->wood==wood;
 		}
-		float maxWood=NeighborsValue(op_max,wood,NULL);
-		float waterAround=NeighborsValue(op_plus,being_a,WATER);
-		if(maxWood>=buildingCost && t%100==0)
+		int HouseNeighbor=NeighborsValue(op_or,being_a,CITY);
+		if(HouseNeighbor)
 		{
-			float value=frnd();
-			if(value>0.5 && waterAround==0)
+			float maxWood=NeighborsValue(op_max,wood,NULL);
+			float waterAround=NeighborsValue(op_plus,being_a,WATER);
+			if(maxWood>=buildingCost && t%100==0)
 			{
-				writeme->state=CITY;
-			}
-			else
-			if(value<0.13 || waterAround>0)
-			{
-				writeme->state=ROCK;
-			}
-			else
-			{
-				writeme->state=STREET;
+				float value=frnd();
+				if(value>0.5 && waterAround==0)
+				{
+					writeme->state=CITY;
+				}
+				else
+				if(value<0.13 || waterAround>0)
+				{
+					writeme->state=ROCK;
+				}
+				else
+				{
+					writeme->state=STREET;
+				}
 			}
 		}
 	}
