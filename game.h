@@ -33,30 +33,28 @@ typedef struct
 
 int maxmen=1000;
 Men **men;
-int meni=0;
 
 void Men_Add(float x,float y)
 {
 	int i;
-	for(i=0;i<meni;i++)
+	for(i=0;i<=maxmen;i++)
 	{
-		if(men[i]==NULL || men[i]->dead==1)
-		{
-			break;
-		}
-		if(i==maxmen-1) //reached the maximum, no add
+		if(i>=maxmen) //reached the maximum, no add
 		{
 			return;
 		}
+		if(men[i]==NULL || men[i]->dead==1)
+		{
+			if(men[i]==NULL)
+			{
+				men[i]=(Men*)malloc(sizeof(Men));
+			}
+			men[i]->x=x;
+			men[i]->y=y;
+			men[i]->dead=0;
+			men[i]->workstate=0;
+			men[i]->wood=0;
+			return;
+		}
 	}
-	if(men[i]==NULL)
-	{
-		men[i]=(Men*)malloc(sizeof(Men));
-	}
-	men[i]->x=x;
-	men[i]->y=y;
-	men[i]->dead=0;
-	men[i]->workstate=0;
-	men[i]->wood=0;
-	meni=min(maxmen,meni+1);
 }

@@ -154,7 +154,7 @@ void draw()
 	glUseProgram(0);													//back to fixed pipeline
 	glActiveTexture(GL_TEXTURE0);										//set texture0
 #endif
-	for(i=0;i<meni;i++)
+	for(i=0;i<maxmen;i++)
 	{
 		if(men[i]!=NULL && men[i]->dead==0)
 		{
