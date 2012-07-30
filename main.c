@@ -69,7 +69,7 @@ void Men_SetNextTarget(Men *men,int state, Cell ***readcells)
 	men->targetx=besti;
 	men->targety=bestj;
 }
-void Men_Add(float x,float y)
+void Men_Add(float x,float y, Cell*** readcells)
 {
 	int i;
 	for(i=0;i<op_min(meni,maxmen);i++)
@@ -81,10 +81,11 @@ void Men_Add(float x,float y)
 			men[i]->dead=0;
 			men[i]->workstate=0;
 			men[i]->wood=0;
+			Men_SetNextTarget(men[i],FOREST,readcells);
 			return;
 		}
 	}
-	if(meni>=maxmen){ return; }										//idiot coding
+	if(meni>=maxmen){ return; }											//idiot coding
 	men[meni]=(Men*)malloc(sizeof(Men));
 	men[meni]->x=x;
 	men[meni]->y=y;
@@ -93,7 +94,9 @@ void Men_Add(float x,float y)
 	men[meni]->dead=0;
 	men[meni]->workstate=0;
 	men[meni]->wood=0;
+	Men_SetNextTarget(men[meni],FOREST,readcells);
 	meni++;
+	
 }
 void Men_Execute(Men* men,Cell ***readcells)
 {
@@ -218,7 +221,7 @@ void Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* righ
 	{
 		if(drnd()>0.95)
 		{
-			Men_Add(i,j);
+			Men_Add(i,j,readcells);
 		}
 	}
 }
