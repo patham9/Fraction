@@ -127,6 +127,10 @@ void draw()
 						{
 							hrend_DrawObj(i,j,0,0.5,1,FOREST_MEN);
 						}
+						if(c->state==STREET)
+						{
+							hrend_DrawObj(i,j,0,0.5,1,STREET_MEN);
+						}
 					}
 					else
 					{

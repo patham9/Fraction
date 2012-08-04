@@ -21,6 +21,7 @@ void Game_Init()
 	////////////////////////// LOAD TEXTURES ///////////////////////////////////////////////////////////////
 	hfio_LoadTex("forest.tga",&FOREST);
 	hfio_LoadTex("street.tga",&STREET);
+	hfio_LoadTex("street_men.tga",&STREET_MEN);
 	hfio_LoadTex("house.tga",&HOUSE);
 	hfio_LoadTex("rock.tga",&ROCK);
 	hfio_LoadTex("water.tga",&WATER);
