@@ -25,6 +25,7 @@ void Pathfinding_Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* lef
 		float dist=NeighborsValue(op_min,forest_distance,NULL);
 		writeme->forest_distance=dist+1;
 	}
+	/////////// A PERSON WANTS TO GET WOOD SO THE PERSON GOES THE WAY OF SHORTEST forest_distance //////////////////////////////////////////////////////////////////////////////////////////
 	test=readme->forest_distance;
 	if(readme->person==0 && readme->state!=WATER && readme->state!=ROCK && NeighborsValue(op_or,has_person_and_higher_forest_distance_than,readme))
 	{
