@@ -3,5 +3,5 @@
 
 int main()
 {
-	Hamlib_CYCLIC(Game_Init,NULL,"1111111111111");  
+	Hamlib_CYCLIC(Game_Init,NULL,"1111111111111");
 }

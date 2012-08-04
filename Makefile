@@ -4,21 +4,22 @@ CFLAGS  =  `pkg-config --cflags libglfw` -Wall -g -D_REENTRANT -DVERSION=\"$(VER
 LDFLAGS = -lGL -lGLU -lglut -lGLEW -lglfw -lm -lpthread
 SERVER_LDFLAGS = -lm -lpthread -lglfw
 
-OBJ = Hamlib/Hrend.o Hamlib/Hinput.o Hamlib/Hcam.o Hamlib/Hnav.o Hamlib/Hfio.o Hamlib/Hgui.o Hamlib/Hutil.o Hamlib/Hshade.o Hamlib/Hauto.o Draw.o Game.o Automat.o Generate.o Cell.o gui.o main.o
-SERVER_OBJ = Hauto.o Hutil.o PerlinNoise.o server.o
+HAMLIB_DIR = Hamlib/
+HAMLIB_OBJ = Hrend.o Hinput.o Hcam.o Hnav.o Hfio.o Hgui.o Hutil.o Hshade.o Hauto.o
+OBJ = Draw.o Game.o Automat.o Generate.o Cell.o gui.o main.o
 
-all: prog server
+all: prog automat
 
-server: $(SERVER_OBJ)
-	$(CC) -w $(CFLAGS) -o server $(SERVER_OBJ) $(SERVER_LDFLAGS)
+automat:
+	cd automat; make;
 
 prog: $(OBJ)
-	cd Hamlib; make; cd ..;
-	$(CC) -w $(CFLAGS) -o prog $(OBJ) $(LDFLAGS);
-	rm H*.o; rm *.o
+	cd $(HAMLIB_DIR); make; cd ..;
+	$(CC) -w $(CFLAGS) -o prog $(OBJ) $(addprefix $(HAMLIB_DIR), $(HAMLIB_OBJ)) $(LDFLAGS);
 
 %.o: %.c
 	$(CC) -w $(CFLAGS) -c $<
 
 clean:
 	rm -rf *.o prog server
+	cd $(HAMLIB_DIR); make clean; cd ..;

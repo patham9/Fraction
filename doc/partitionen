@@ -1,0 +1,18 @@
+
+Partitionen
+	- Aufteilung von Zellen (Baumstruktur)
+		- Root-Zelle: Zugriff auf alle Zellen
+		- Root-Zelle hat vier Nodes -> jede davon 1/4 der Welt usw.
+		- Bei den Berechnungen wird es ueberschneidungen geben
+	- Pro prozessor eine partition zu berechnen
+	- Der benutzer braucht nur teile der welt sehen -> partitionen
+	
+	- Berechnungen durchfuehren
+	- Zellaenderungen tracken
+	- Partitionen komprimieren
+	
+	- Clientseitig: Welt dynamisch laden / vergroessern
+	- Statistiken: welche partitionen werden zuerst geladen usw.
+	
+	- Bei mehreren Clienten: komprimierte partitionen cachen
+	
