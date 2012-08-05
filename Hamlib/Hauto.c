@@ -9,8 +9,8 @@ Hauto_OBJ *Hauto_OBJ_NEW(int nstatistics,int n,void (*Exec)(int t,int i,int j,vo
     ret->nstatistics=nstatistics;
     ret->n=n;
     ret->Exec=Exec;
-    ret->readCellStatistics=(int*) malloc(nstatistics*sizeof(int));
-    ret->writeCellStatistics=(int*) malloc(nstatistics*sizeof(int));
+    ret->readCellStatistics=(int*) calloc(nstatistics,sizeof(int));
+    ret->writeCellStatistics=(int*) calloc(nstatistics,sizeof(int));
     ret->readCells=(void***) malloc(n*sizeof(void**));
     ret->writeCells=(void***) malloc(n*sizeof(void**));
     for(i=0;i<n;i++)
