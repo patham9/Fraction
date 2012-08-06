@@ -10,14 +10,6 @@ Def( has_person_and_higher_forest_distance_than , c->person==1 && c->forest_dist
 Def( has_person_and_higher_house_distance_than  , c->person==2 && c->house_distance>test  ) //*((float*)ref)
 void Pathfinding_Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* right,Cell* up,Cell* down,Cell* left_up,Cell* left_down,Cell* right_up,Cell* right_down,Cell ***readcells)
 {
-    /////////// AN OBSTACLE DELETES PATH INFO PERSONS AND RESOURCES/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	if(readme->state==ROCK || readme->state==WATER)
-	{
-		writeme->house_distance=100000;
-		writeme->forest_distance=100000;
-		writeme->wood=0;
-		writeme->person=0;
-	}
 	/////////// A WOOD SENDS WOOD PATH INFORMATION /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	if(readme->state!=FOREST && readme->state!=ROCK && readme->state!=WATER && NeighborsValue(op_plus,being_a,FOREST)>=1)
 	{
@@ -45,7 +37,7 @@ void Pathfinding_Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* lef
 	if(t%2==0 && readme->person==0 && readme->state!=WATER && readme->state!=ROCK && NeighborsValue(op_or,has_person_and_higher_forest_distance_than,readme))
 	{
 		Cell* first=FirstNeighbor(has_person_and_higher_forest_distance_than,readme);
-		writeme->person=1;
+		writeme_person(1);
 		writeme->job=first->job;
 		SetCell(first->i,first->j,Cell,person,0);  //<-side effect be careful, but we don't want clones.
 	}
@@ -53,18 +45,29 @@ void Pathfinding_Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* lef
 	if(t%2==0 && readme->person==0 && readme->state!=WATER && readme->state!=ROCK && NeighborsValue(op_or,has_person_and_higher_house_distance_than,readme))
 	{
 		Cell* first=FirstNeighbor(has_person_and_higher_house_distance_than,readme);
-		writeme->person=2;
+		writeme_person(2);
 		writeme->job=first->job;
 		SetCell(first->i,first->j,Cell,person,0);  						//<-side effect be careful, but we don't want clones.
 	}
 	/////////// A PERSON WHICH ALREADY HAS WOOD HAS TO BRING IT BACK////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	if(readme->person==1 && NeighborsValue(op_plus,being_a,FOREST)>0)
 	{
-		writeme->person=2;
+		writeme_person(2);
 	}
 	if(readme->state==FOREST && NeighborsValue(op_or,being_a_person,NULL))
 	{
 		writeme_state(GRASS);
+	}
+	/////////// AN OBSTACLE DELETES PATH INFO PERSONS AND RESOURCES - PEOPLE STANDING AROUND ARE ALSO OBSTACLES BUT ONLY PATH INFO GETS REMOVED ////////////////////////////////////////////
+	if(readme->state==ROCK || readme->state==WATER || (readme->person && readme->lastchange>0))
+	{
+		writeme->house_distance=100000;
+		writeme->forest_distance=100000;
+	}
+	if(readme->state==ROCK || readme->state==WATER)
+	{
+		writeme->wood=0;
+		writeme_person(0);
 	}
 }
 void Population_Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* right,Cell* up,Cell* down,Cell* left_up,Cell* left_down,Cell* right_up,Cell* right_down,Cell ***readcells)
@@ -72,12 +75,12 @@ void Population_Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left
 	/////////// A HOUSE HAS A POSSIBILITY FOR SPAWNING PEOPLE ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	if(readme->state==HOUSE && drnd()>0.99)
 	{
-		writeme->person=1;
+		writeme_person(1);
 	}
 	/////////// A PERSON BROUGHT WOOD BACK GOES INTO THE HOUSE AND BUILDS THIS CITY ON ROCK'N ROLL ///////////////////////////////////////////////////////////////////////////////////////////
 	if(readme->person==2 && readme->state!=HOUSE && NeighborsValue(op_plus,being_a,HOUSE)>0)
 	{
-		writeme->person=0;
+		writeme_person(0);
 		if(NeighborsValue(op_plus,being_a,WATER)>0)
 		{
 			writeme->state=ROCK;

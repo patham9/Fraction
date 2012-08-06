@@ -36,5 +36,6 @@ Cell *Cell_NEW(int i,int j); 		 									//constructor for a new cell called for
 
 float being_a(Cell *c,int state);
 #define writeme_state(value) {writeme->state=value; writeme->lastchange=0;}
+#define writeme_person(value) {writeme->person=value; writeme->lastchange=0;}
 
 #endif
