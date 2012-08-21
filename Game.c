@@ -24,21 +24,11 @@ void Game_Init()
 	hfio_LoadTex("street_men.tga",&STREET_MEN);
 	hfio_LoadTex("house.tga",&HOUSE);
 	hfio_LoadTex("rock.tga",&ROCK);
-	hfio_LoadTex("water.tga",&WATER);
-	hfio_LoadTex("grass.tga",&GRASS); 
-	hfio_LoadTex("water_grass_right.tga",&GRASS_L);
-	hfio_LoadTex("water_grass_down.tga",&GRASS_T);
-	hfio_LoadTex("water_grass_left.tga",&GRASS_R);
-	hfio_LoadTex("water_grass_top.tga",&GRASS_D);
-	hfio_LoadTex("water_grass_left_down.tga",&GRASS_RT);
-	hfio_LoadTex("water_grass_left_top.tga",&GRASS_RD);
-	hfio_LoadTex("water_grass_right_down.tga",&GRASS_LT);
-	hfio_LoadTex("water_grass_right_top.tga",&GRASS_LD);
-	hfio_LoadTex("water_grass_around.tga",&GRASS_A);
-	hfio_LoadTex("grass.tga",&GPUTex);
+	hfio_LoadTex("rock.tga",&GPUTex);
 	hfio_LoadTex("house_men.tga",&HOUSE_MEN);
 	hfio_LoadTex("grass_men.tga",&GRASS_MEN);
 	hfio_LoadTex("forest_men.tga",&FOREST_MEN);
+	WATER=102;GRASS=101;
 	////////////////////////// OTHER INIT STUFF ///////////////////////////////////////////////////////////////
 	type=GRASS;
 	srand(WORLD);

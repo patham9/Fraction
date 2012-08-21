@@ -6,11 +6,8 @@ Hauto_OBJ *Hauto_OBJ_NEW(int nstatistics,int n,void (*Exec)(int t,int i,int j,vo
 	int i,j;
     Hauto_OBJ *ret=(Hauto_OBJ*) malloc(sizeof(Hauto_OBJ));
     ret->t=0;
-    ret->nstatistics=nstatistics;
     ret->n=n;
     ret->Exec=Exec;
-    ret->readCellStatistics=(int*) calloc(nstatistics,sizeof(int));
-    ret->writeCellStatistics=(int*) calloc(nstatistics,sizeof(int));
     ret->readCells=(void***) malloc(n*sizeof(void**));
     ret->writeCells=(void***) malloc(n*sizeof(void**));
     for(i=0;i<n;i++)
@@ -27,7 +24,7 @@ Hauto_OBJ *Hauto_OBJ_NEW(int nstatistics,int n,void (*Exec)(int t,int i,int j,vo
 }
 void Hauto_OBJ_Exec(Hauto_OBJ *aut)
 {
-	int i,j,*temp;
+	int i,j;
 	aut->t++;
 	for(i=1;i<aut->n-1;i++)
 	{
@@ -38,16 +35,9 @@ void Hauto_OBJ_Exec(Hauto_OBJ *aut)
 		}
 	}
 	//change write to read and read to write
-	void ***temp2=aut->readCells;
+	void ***temp=aut->readCells;
 	aut->readCells=aut->writeCells;
-	aut->writeCells=temp2;
-	temp=aut->readCellStatistics;
-	aut->readCellStatistics=aut->writeCellStatistics;
-	aut->writeCellStatistics=temp;
-	for(i=0;i<aut->nstatistics;i++)
-	{
-		aut->writeCellStatistics[i]=0;
-	}
+	aut->writeCells=temp;
 }
 float Hauto_OBJ_NeighborsValue(float (*Op)(float, float),int i,int j,void ***readCells,float (*Neighbor_Value)(void*,void*),void* data)
 {

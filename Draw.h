@@ -11,6 +11,7 @@
 #define debugdraw_property_g c->forest_distance/worldsize
 
 void draw();
+void Draw_Set_HeightmapChanged();
 void Draw_Set_DebugDraw(int s);
 int Draw_Get_DebugDraw();
 

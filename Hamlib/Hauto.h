@@ -35,10 +35,7 @@ typedef struct
 	void (*Exec)(int,int,int,void*,void*,void*,void*,void*,void*,void*,void*,void*,void*,void ***readCells);
 	void ***readCells;  //2D-array(**) of Cell objects(*)
 	void ***writeCells; //2D-array(**) of Cell objects(*)
-	int *readCellStatistics;
-	int *writeCellStatistics;
 	int n;
-	int nstatistics;
 	int t;
 }Hauto_OBJ;
 ///////////////////////////////////////////////

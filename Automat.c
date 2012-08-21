@@ -1,5 +1,6 @@
 #include "Automat.h"
 #include "Game.h"
+#include "Draw.h"
 
 Def( forest_distance    , c->forest_distance )
 Def( house_distance     , c->house_distance  )
@@ -56,7 +57,7 @@ void Pathfinding_Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* lef
 	}
 	if(readme->state==FOREST && NeighborsValue(op_or,being_a_person,NULL))
 	{
-		writeme_state(GRASS);
+		writeme_state(GRASS); 
 	}
 	/////////// AN OBSTACLE DELETES PATH INFO PERSONS AND RESOURCES - PEOPLE STANDING AROUND ARE ALSO OBSTACLES BUT ONLY PATH INFO GETS REMOVED ////////////////////////////////////////////
 	if(readme->state==ROCK || readme->state==WATER || (readme->person && readme->lastchange>0))
@@ -123,7 +124,7 @@ void Water_Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell
 	/////////// (WATER FLOWS DOWNWARDS) A CELL WHICH ISN'T ROCK WHICH HAS NEIGHBORS WITH WATER ON A HIGHER POSITION GETS WATER AND REMEMBERS A ROOT CELL /////////////////////////////////////
 	if(readme->state!=WATER && readme->state!=ROCK && NeighborsValue(op_or,water_and_higher_than,readme))
 	{ 
-		writeme_state(WATER);
+		writeme_state(WATER); 
 		writeme->rootwater=FirstNeighbor(water_and_higher_than,readme);
 	} 
 	/////////// WATER WITHOUT HAVING A ROOT WATER HAS LOST ITS SOURCE ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -136,19 +137,7 @@ void Water_Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell
 void Weather_Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* right,Cell* up,Cell* down,Cell* left_up,Cell* left_down,Cell* right_up,Cell* right_down,Cell ***readcells){}
 void Automat_Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* right,Cell* up,Cell* down,Cell* left_up,Cell* left_down,Cell* right_up,Cell* right_down,Cell ***readcells)
 {
-	writeme->i=readme->i;												//never forget these
-	writeme->j=readme->j;												//because Hauto allows change based automats too
-	writeme->lastchange=readme->lastchange+1;							//some rules may function without these
-	writeme->person=readme->person;										//but i don't want to debug automats and waste brain power about all the cases where this is needed and not :D
-	writeme->job=readme->job;
-	writeme->state=readme->state;
-	writeme->height=readme->height; 
-	writeme->wateramount=readme->wateramount;
-	writeme->rootwater=readme->rootwater;
-	writeme->house_distance=readme->house_distance;
-	writeme->forest_distance=readme->forest_distance;
-	writeme->wood=readme->wood;
-	
+	memcpy(writeme,readme,sizeof(Cell));
 	Water_Simulate(t,i,j,writeme,readme,left,right,up,down,left_up,left_down,right_up,right_down,readcells);
 	Vegetation_Simulate(t,i,j,writeme,readme,left,right,up,down,left_up,left_down,right_up,right_down,readcells);
 	Pathfinding_Simulate(t,i,j,writeme,readme,left,right,up,down,left_up,left_down,right_up,right_down,readcells);
