@@ -18,7 +18,10 @@ void Automat_Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Ce
 	else 																																			\
 	if(readme->variable!=state_variable && readme->state!=WATER && readme->state!=ROCK)																\
 	{ 																																				\
-		writeme->distance_variable=NeighborsValue(op_min,distance_variable,NULL)+1;																	\
+	    if(readme->state==STREET)																													\
+	      writeme->distance_variable=NeighborsValue(op_min,distance_variable,NULL)+0.5;																\
+		else 																																		\
+		  writeme->distance_variable=NeighborsValue(op_min,distance_variable,NULL)+1;																\
 	}																																				\
 	if(readme->state==ROCK || readme->state==WATER || (readme->person!=not_a_person && readme->lastchange>0))										\
 	{																																				\
