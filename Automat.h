@@ -28,7 +28,7 @@ void Automat_Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Ce
 	
 #define Person_Minimizes(job,distance_variable)																															\
 	Def( job##has_job_and_higher_goal_distance_than , c->person==job && c->distance_variable > readme->distance_variable ) 												\
-	if(t%2==0 && readme->person==not_a_person && readme->state!=WATER && readme->state!=ROCK && NeighborsValue(op_or,job##has_job_and_higher_goal_distance_than,readme))\
+	if((t%2==0 || readme->state==STREET) && readme->person==not_a_person && readme->state!=WATER && readme->state!=ROCK && NeighborsValue(op_or,job##has_job_and_higher_goal_distance_than,readme))\
 	{																																									\
 		Cell* first=FirstNeighbor(job##has_job_and_higher_goal_distance_than,readme);																					\
 		writeme_person(job);																																			\
