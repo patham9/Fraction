@@ -2,86 +2,32 @@
 #include "Game.h"
 #include "Draw.h"
 
-Def( forest_distance    , c->forest_distance )
-Def( house_distance     , c->house_distance  )
-Def( being_a_person     , c->person          )
-Def( being_a_homecomer  , c->person==2    )
-float test=0;
-Def( has_person_and_higher_forest_distance_than , c->person==1 && c->forest_distance>test ) //*((float*)ref)
-Def( has_person_and_higher_house_distance_than  , c->person==2 && c->house_distance>test  ) //*((float*)ref)
+Def( forest_distance    , c->forest_distance 	  )
+Def( house_distance     , c->house_distance  	  )
+Def( being_a_person     , c->person!=not_a_person )
 void Pathfinding_Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* right,Cell* up,Cell* down,Cell* left_up,Cell* left_down,Cell* right_up,Cell* right_down,Cell ***readcells)
 {
-	/////////// A WOOD SENDS WOOD PATH INFORMATION /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	if(readme->state!=FOREST && readme->state!=ROCK && readme->state!=WATER && NeighborsValue(op_plus,being_a,FOREST)>=1)
-	{
-		writeme->forest_distance=1;
-	}
-	else
-	if(readme->state!=FOREST && readme->state!=WATER && readme->state!=ROCK)
-	{ 
-		float dist=NeighborsValue(op_min,forest_distance,NULL);
-		writeme->forest_distance=dist+1;
-	}
-	/////////// A HOUSE SENDS HOUSE PATH INFORMATION /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	if(readme->state!=HOUSE && readme->state!=ROCK && readme->state!=WATER && NeighborsValue(op_plus,being_a,HOUSE)>=1)
-	{
-		writeme->house_distance=1;
-	}
-	else
-	if(readme->state!=HOUSE && readme->state!=WATER && readme->state!=ROCK)
-	{ 
-		float dist=NeighborsValue(op_min,house_distance,NULL);
-		writeme->house_distance=dist+1;
-	}
-	/////////// A PERSON WANTS TO GET SOMETHING SO THE PERSON GOES THE WAY OF SHORTEST DISTANCE ////////////////////////////////////////////////////////////////////////////////////////////
-	test=readme->forest_distance;
-	if(t%2==0 && readme->person==0 && readme->state!=WATER && readme->state!=ROCK && NeighborsValue(op_or,has_person_and_higher_forest_distance_than,readme))
-	{
-		Cell* first=FirstNeighbor(has_person_and_higher_forest_distance_than,readme);
-		writeme_person(1);
-		writeme->job=first->job;
-		SetCell(first->i,first->j,Cell,person,0);  //<-side effect be careful, but we don't want clones.
-	}
-	test=readme->house_distance;
-	if(t%2==0 && readme->person==0 && readme->state!=WATER && readme->state!=ROCK && NeighborsValue(op_or,has_person_and_higher_house_distance_than,readme))
-	{
-		Cell* first=FirstNeighbor(has_person_and_higher_house_distance_than,readme);
-		writeme_person(2);
-		writeme->job=first->job;
-		SetCell(first->i,first->j,Cell,person,0);  						//<-side effect be careful, but we don't want clones.
-	}
+	Distributes_Path_Information(FOREST, forest_distance);
+	Person_Minimizes(rockfeller, forest_distance);
+	Distributes_Path_Information(HOUSE , house_distance);
+	Person_Minimizes(homecomer,  house_distance);  
+}
+void Person_Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* right,Cell* up,Cell* down,Cell* left_up,Cell* left_down,Cell* right_up,Cell* right_down,Cell ***readcells)
+{ 
 	/////////// A PERSON WHICH ALREADY HAS WOOD HAS TO BRING IT BACK////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	if(readme->person==1 && NeighborsValue(op_plus,being_a,FOREST)>0)
 	{
-		writeme_person(2);
+		writeme_person(homecomer);
 	}
+	/////////// A WOODFELLER WHO FOUND A TREE DESTROYS IT//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	if(readme->state==FOREST && NeighborsValue(op_or,being_a_person,NULL))
 	{
 		writeme_state(GRASS); 
 	}
-	/////////// AN OBSTACLE DELETES PATH INFO PERSONS AND RESOURCES - PEOPLE STANDING AROUND ARE ALSO OBSTACLES BUT ONLY PATH INFO GETS REMOVED ////////////////////////////////////////////
-	if(readme->state==ROCK || readme->state==WATER || (readme->person && readme->lastchange>0))
-	{
-		writeme->house_distance=100000;
-		writeme->forest_distance=100000;
-	}
-	if(readme->state==ROCK || readme->state==WATER)
-	{
-		writeme->wood=0;
-		writeme_person(0);
-	}
-}
-void Population_Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* right,Cell* up,Cell* down,Cell* left_up,Cell* left_down,Cell* right_up,Cell* right_down,Cell ***readcells)
-{
-	/////////// A HOUSE HAS A POSSIBILITY FOR SPAWNING PEOPLE ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	if(readme->state==HOUSE && drnd()>0.99)
-	{
-		writeme_person(1);
-	}
 	/////////// A PERSON BROUGHT WOOD BACK GOES INTO THE HOUSE AND BUILDS THIS CITY ON ROCK'N ROLL ///////////////////////////////////////////////////////////////////////////////////////////
-	if(readme->person==2 && readme->state!=HOUSE && NeighborsValue(op_plus,being_a,HOUSE)>0)
+	if(readme->person==homecomer && readme->state!=HOUSE && NeighborsValue(op_plus,being_a,HOUSE)>0)
 	{
-		writeme_person(0);
+		writeme_person(not_a_person);
 		if(NeighborsValue(op_plus,being_a,WATER)>0)
 		{
 			writeme->state=ROCK;
@@ -97,6 +43,19 @@ void Population_Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left
 				writeme_state(STREET);
 			}
 		}
+	}
+}
+void Population_Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* right,Cell* up,Cell* down,Cell* left_up,Cell* left_down,Cell* right_up,Cell* right_down,Cell ***readcells)
+{
+	/////////// A HOUSE HAS A POSSIBILITY FOR SPAWNING PEOPLE ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	if(readme->state==HOUSE && drnd()>0.99)
+	{
+		writeme_person(rockfeller);
+	}
+	/////////// DEATH BY ROCK OR WATER ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	if(readme->state==ROCK || readme->state==WATER) //death by rock or water
+	{
+		writeme_person(not_a_person);
 	}
 }
 Def( water_amount          , c->wateramount                             )
@@ -138,9 +97,11 @@ void Weather_Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Ce
 void Automat_Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* right,Cell* up,Cell* down,Cell* left_up,Cell* left_down,Cell* right_up,Cell* right_down,Cell ***readcells)
 {
 	memcpy(writeme,readme,sizeof(Cell));
+	writeme->lastchange++;
 	Water_Simulate(t,i,j,writeme,readme,left,right,up,down,left_up,left_down,right_up,right_down,readcells);
 	Vegetation_Simulate(t,i,j,writeme,readme,left,right,up,down,left_up,left_down,right_up,right_down,readcells);
 	Pathfinding_Simulate(t,i,j,writeme,readme,left,right,up,down,left_up,left_down,right_up,right_down,readcells);
+	Person_Simulate(t,i,j,writeme,readme,left,right,up,down,left_up,left_down,right_up,right_down,readcells);
 	Population_Simulate(t,i,j,writeme,readme,left,right,up,down,left_up,left_down,right_up,right_down,readcells);
 	Weather_Simulate(t,i,j,writeme,readme,left,right,up,down,left_up,left_down,right_up,right_down,readcells);
 }

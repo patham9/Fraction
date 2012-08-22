@@ -1,14 +1,15 @@
+#include "Hamlib/Hamlib.h"
 #include "Game.h"
 #include "Automat.h"
 #include "Generate.h"
 #include "Draw.h"
 #include "gui.h"
 
-void Game_Thread()
+void Game_Thread() 
 {
 	while(1)
 	{
-		Hauto_OBJ_Exec(automat);
+		Hauto_OBJ_Exec(automat); 
 		Wait(0.001);
 	}					
 }
@@ -36,4 +37,8 @@ void Game_Init()
 	automat=Hauto_OBJ_NEW(10,worldsize,Automat_Simulate,Cell_NEW);
 	Generate_World();
 	Thread_NEW(Game_Thread,NULL);
+}
+int main()
+{
+	Hamlib_CYCLIC(Game_Init,NULL,"1111111111111");
 }

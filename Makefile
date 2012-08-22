@@ -1,12 +1,12 @@
 VERSION = 3.02
 CC      = gcc
-CFLAGS  =  `pkg-config --cflags libglfw` -Wall -g -D_REENTRANT -DVERSION=\"$(VERSION)\"
+CFLAGS  =  `pkg-config --cflags libglfw` -O2 -Wall -g -D_REENTRANT -DVERSION=\"$(VERSION)\"
 LDFLAGS = -lGL -lGLU -lglut -lGLEW -lglfw -lm -lpthread
 SERVER_LDFLAGS = -lm -lpthread -lglfw
 
 HAMLIB_DIR = Hamlib/
 HAMLIB_OBJ = Hrend.o Hinput.o Hcam.o Hnav.o Hfio.o Hgui.o Hutil.o Hshade.o Hauto.o
-OBJ = Draw.o Game.o Automat.o Generate.o Cell.o gui.o main.o
+OBJ = Draw.o Game.o Automat.o Generate.o Cell.o gui.o
 
 all: prog automat
 
