@@ -2,33 +2,35 @@
 #include "Game.h"
 #include "Draw.h"
 
-Def( forest_distance    , c->forest_distance 	  )
-Def( house_distance     , c->house_distance  	  )
-Def( being_a_person     , c->person!=not_a_person )
 void Pathfinding_Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* right,Cell* up,Cell* down,Cell* left_up,Cell* left_down,Cell* right_up,Cell* right_down,Cell ***readcells)
 {
-	Distributes_Path_Information(FOREST, forest_distance);
+	Distributes_Path_Information(state, FOREST, forest_distance);
 	Person_Minimizes(rockfeller, forest_distance);
-	Distributes_Path_Information(HOUSE , house_distance);
-	Person_Minimizes(homecomer,  house_distance);  
+	Distributes_Path_Information(state, HOUSE , house_distance);
+	Person_Minimizes(homecomer,  house_distance);
+	Distributes_Path_Information(has_command,1, command_distance);
+	Person_Minimizes(footman,  command_distance); 
 }
+Def( being_a_person     , c->person!=not_a_person   )
+Def( being_a_rockfeller , c->person==rockfeller     )  
+Def( has_command     	, c->has_command            )
 void Person_Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* right,Cell* up,Cell* down,Cell* left_up,Cell* left_down,Cell* right_up,Cell* right_down,Cell ***readcells)
 { 
-	/////////// A PERSON WHICH ALREADY HAS WOOD HAS TO BRING IT BACK////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	if(readme->person==1 && NeighborsValue(op_plus,being_a,FOREST)>0)
+	/////////// A PERSON WHICH ALREADY HAS WOOD OR DONE ITS JOB HAS TO BRING IT BACK////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	if(readme->person==rockfeller && NeighborsValue(op_or,being_a,FOREST))
 	{
 		writeme_person(homecomer);
 	}
 	/////////// A WOODFELLER WHO FOUND A TREE DESTROYS IT//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	if(readme->state==FOREST && NeighborsValue(op_or,being_a_person,NULL))
+	if(readme->state==FOREST && NeighborsValue(op_or,being_a_rockfeller,NULL))
 	{
 		writeme_state(GRASS); 
 	}
 	/////////// A PERSON BROUGHT WOOD BACK GOES INTO THE HOUSE AND BUILDS THIS CITY ON ROCK'N ROLL ///////////////////////////////////////////////////////////////////////////////////////////
-	if(readme->person==homecomer && readme->state!=HOUSE && NeighborsValue(op_plus,being_a,HOUSE)>0)
+	if(readme->person==homecomer && readme->state!=HOUSE && NeighborsValue(op_or,being_a,HOUSE))
 	{
 		writeme_person(not_a_person);
-		if(NeighborsValue(op_plus,being_a,WATER)>0)
+		if(NeighborsValue(op_or,being_a,WATER))
 		{
 			writeme->state=ROCK;
 		}
@@ -44,13 +46,24 @@ void Person_Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cel
 			}
 		}
 	}
+	/////////// A FOOTMAN AT THE WORKING PLACE FOR THE PLAYER BUILDS IT FOR THE PLAYER ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	if(readme->has_command && NeighborsValue(op_or,being_a_person,NULL))
+	{
+		writeme_state(readme->command);
+		writeme->has_command=0;
+	}
+	/////////// A FOOTMAN GETS WOOD FELLER IF TREE IS NEARER THAN JOB, AND IF JOB IS FINISHED  ////////////////////////////////////////////////////////////////////////////////////////////////////
+	if(readme->person==footman && readme->command_distance>readme->forest_distance || readme->person==footman && NeighborsValue(op_or,has_command,NULL))
+	{
+		writeme_person(rockfeller);
+	}
 }
 void Population_Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* right,Cell* up,Cell* down,Cell* left_up,Cell* left_down,Cell* right_up,Cell* right_down,Cell ***readcells)
 {
 	/////////// A HOUSE HAS A POSSIBILITY FOR SPAWNING PEOPLE ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	if(readme->state==HOUSE && drnd()>0.99)
 	{
-		writeme_person(rockfeller);
+		writeme_person(footman);
 	}
 	/////////// DEATH BY ROCK OR WATER ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	if(readme->state==ROCK || readme->state==WATER) //death by rock or water

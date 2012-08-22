@@ -59,7 +59,7 @@ void draw()
 		{		
 			Cell ***readcells=(Cell***)automat->readCells;
 			Cell *c=readcells[i][j];
-			if(debugdraw || (c->state!=GRASS && c->state!=WATER) || c->person)											//draw cell only if camera sees it and if state!=GRASS
+			if(debugdraw || c->has_command || (c->state!=GRASS && c->state!=WATER) || c->person)											//draw cell only if camera sees it and if state!=GRASS
 			{														
 				if(abs(hnav_MouseToWorldCoordX(hrend.width/2)-i)<hnav_MouseToWorldCoordX(hrend.width/2)-hnav_MouseToWorldCoordX(0) 	
 				&& abs(hnav_MouseToWorldCoordY(hrend.height/2)-j)<hnav_MouseToWorldCoordY(0)-hnav_MouseToWorldCoordY(hrend.height/2))
@@ -73,7 +73,11 @@ void draw()
 					}
 					int grass_around=NeighborsValue(op_plus,being_a,GRASS);
 					hrend_SelectColor(addr+0.5+c->height/20.0,addg+0.6+c->height/20.0,addb+0.2+c->height/20.0+c->wateramount/5.0,1);
-					
+					if(c->has_command)
+					{
+						hrend_DrawObj(i,j,0,0.5,1,COMMAND);
+					}
+					else
 					if(c->person)
 					{
 						if(c->state==GRASS)

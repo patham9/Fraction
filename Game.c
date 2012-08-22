@@ -20,6 +20,7 @@ void Game_Init()
 	hrend_2Dmode(0.5,0.6,0.5);
 	gui_Init();
 	////////////////////////// LOAD TEXTURES ///////////////////////////////////////////////////////////////
+	hfio_LoadTex("command.tga",&COMMAND);
 	hfio_LoadTex("forest.tga",&FOREST);
 	hfio_LoadTex("street.tga",&STREET);
 	hfio_LoadTex("street_men.tga",&STREET_MEN);
@@ -31,7 +32,7 @@ void Game_Init()
 	hfio_LoadTex("forest_men.tga",&FOREST_MEN);
 	WATER=102;GRASS=101;
 	////////////////////////// OTHER INIT STUFF ///////////////////////////////////////////////////////////////
-	type=GRASS;
+	type=BASE;
 	srand(WORLD);
 	landscape=Generate_PerlinNoise(worldsize,worldsize,Generate_WhiteNoise(worldsize,worldsize),8,2);
 	automat=Hauto_OBJ_NEW(10,worldsize,Automat_Simulate,Cell_NEW);

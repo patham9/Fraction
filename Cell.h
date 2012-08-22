@@ -13,7 +13,7 @@ typedef struct
 	int lastchange;														//since when is the cell what it is?
 	
 	//person:
-	enum {not_a_person,rockfeller,homecomer} person;															//0=no person, >0 specific job
+	enum {not_a_person,rockfeller,footman,homecomer} person;			
 	
 	//landscape:
 	int state;
@@ -24,8 +24,13 @@ typedef struct
 	void *rootwater; 
 	
 	//path-finding:
+	float command_distance;
 	float house_distance;
 	float forest_distance;
+	
+	//player command:
+	int command;
+	int has_command;
 	
 }Cell;
 Cell *Cell_NEW(int i,int j); 		 									//constructor for a new cell called for every cell when the automat constructor is called

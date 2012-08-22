@@ -10,8 +10,16 @@ void mouse_down(EventArgs *e)
 	{
 		if(e->mk==1)
 		{
-			SetCell(i,j,Cell,state,type);								//set the cell to the selected type on left mouse
-		}					
+			if(type==BASE)
+			{
+				SetCell(i,j,Cell,state,HOUSE);								//set the cell to the selected type on left mouse
+			}
+			else
+			{
+				SetCell(i,j,Cell,command,type);
+				SetCell(i,j,Cell,has_command,1);
+			}
+		}			
 	}
 }
 void key_up(EventArgs *e) 
@@ -22,6 +30,7 @@ void key_up(EventArgs *e)
 	if(e->mk=='F'){ type=FOREST; }
 	if(e->mk=='G'){ type=GRASS; }
 	if(e->mk=='S'){ type=STREET; }
+	if(e->mk=='B'){ type=BASE; }
 	if(e->mk=='D'){ Draw_Set_DebugDraw(!Draw_Get_DebugDraw()); }
 }
 void Button(int i)
@@ -41,4 +50,5 @@ void gui_Init()
 	hgui_AddSimpleElem(0.6,0,0.09,0.04,"ROCK",Button,'R');
 	hgui_AddSimpleElem(0.7,0,0.09,0.04,"HOUSE",Button,'H');
 	hgui_AddSimpleElem(0.8,0,0.09,0.04,"DEBUG",Button,'D');
+	hgui_AddSimpleElem(0.9,0,0.09,0.04,"BASE",Button,'B');
 }
