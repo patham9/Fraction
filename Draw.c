@@ -74,28 +74,18 @@ void draw()
 					int grass_around=NeighborsValue(op_plus,being_a,GRASS);
 					hrend_SelectColor(addr+0.5+c->height/20.0,addg+0.6+c->height/20.0,addb+0.2+c->height/20.0+c->wateramount/5.0,1);
 					if(c->has_command)
-					{
 						hrend_DrawObj(i,j,0,0.5,1,COMMAND);
-					}
 					else
 					if(c->person)
 					{
 						if(c->state==GRASS)
-						{
 							hrend_DrawObj(i,j,0,0.5,1,GRASS_MEN);
-						}
 						if(c->state==HOUSE)
-						{
 							hrend_DrawObj(i,j,0,0.5,1,HOUSE_MEN);
-						}
 						if(c->state==FOREST)
-						{
 							hrend_DrawObj(i,j,0,0.5,1,FOREST_MEN);
-						}
 						if(c->state==STREET)
-						{
 							hrend_DrawObj(i,j,0,0.5,1,STREET_MEN);
-						}
 					}
 					else
 					{

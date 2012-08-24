@@ -13,7 +13,7 @@ typedef struct
 	int lastchange;														//since when is the cell what it is?
 	
 	//person:
-	enum {not_a_person,rockfeller,footman,homecomer} person;			
+	enum {not_a_person,worker,homecomer} person;			
 	
 	//landscape:
 	int state;
@@ -26,7 +26,6 @@ typedef struct
 	//path-finding:
 	float command_distance;
 	float house_distance;
-	float forest_distance;
 	
 	//player command:
 	int command;
@@ -36,7 +35,7 @@ typedef struct
 Cell *Cell_NEW(int i,int j); 		 									//constructor for a new cell called for every cell when the automat constructor is called
 
 float being_a(Cell *c,int state);
-#define writeme_state(value) {writeme->state=value; writeme->lastchange=0; if(readme->state==WATER && writeme->state!=WATER || readme->state!=WATER && writeme->state==WATER){Draw_Set_HeightmapChanged();}}
-#define writeme_person(value) {writeme->person=value; writeme->lastchange=0;}
+#define writeme_state(value) do{writeme->state=value; writeme->lastchange=0; if(readme->state==WATER && writeme->state!=WATER || readme->state!=WATER && writeme->state==WATER){Draw_Set_HeightmapChanged();}}while(0)
+#define writeme_person(value) do{writeme->person=value; writeme->lastchange=0;}while(0)
 
 #endif

@@ -5,7 +5,7 @@
 #include "Hamlib/Hauto.h"
 
 #define WORLD 999
-#define worldsize 256
+#define worldsize 128
 #define BASE 999
 
 uint STREET,ROCK,FOREST,HOUSE,WATER,GRASS,HOUSE_MEN,FOREST_MEN,GRASS_MEN,STREET_MEN,COMMAND,GPUTex,type;

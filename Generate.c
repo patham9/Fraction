@@ -10,11 +10,9 @@ void Generate_World()
 		for(j=2;j<worldsize-2;j++)
 		{
 			if(frnd()>0.9998)
-			{
 				SetCell(i,j,Cell,state,WATER);
-			}
 			if(frnd()>0.9990)
-			{
+			{ 
 				SetCell(i,j,Cell,state,FOREST);
 				SetCell(i+1,j,Cell,state,FOREST);
 				SetCell(i,j+1,Cell,state,FOREST);

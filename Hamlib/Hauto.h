@@ -52,7 +52,7 @@ float Hauto_OBJ_NeighborsValue(float (*Op)(float, float),int i,int j,void ***rea
 void *Hauto_OBJ_FirstNeighbor(int i,int j,void ***readCells,float (*Neighbor_Value)(void*,void*),void* data);
 #define NeighborsValue(Operation,Condition,Data) Hauto_OBJ_NeighborsValue(Operation,i,j,readcells,Condition,Data)
 #define FirstNeighbor(Condition,Data) Hauto_OBJ_FirstNeighbor(i,j,readcells,Condition,Data)
-#define SetCell(i,j,Type,property,value) {((Type*)automat->readCells[i][j])->property=value;((Type*)automat->writeCells[i][j])->property=value;}
+#define SetCell(i,j,Type,property,value) do{((Type*)automat->readCells[i][j])->property=value;((Type*)automat->writeCells[i][j])->property=value;}while(0)
 #define GetCell(i,j,Type,property) ((Type*)automat->readCells[i][j])->property
 #define N 8
 //::::::::::::::::::::::::::::::::::::::::::://

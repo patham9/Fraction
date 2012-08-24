@@ -9,9 +9,9 @@ void Automat_Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Ce
 #define Def(name,condition) float name(Cell *c,Cell *ref){ return condition; }
 
 #define Distributes_Path_Information(variable,state_variable,distance_variable) 																	\
-	Def( variable##state_variable    ,   c->variable==state_variable 	   )																		\
-	Def( distance_variable			 ,   c->distance_variable		  	   )																		\
-	if(readme->variable!=state_variable && readme->state!=ROCK && readme->state!=WATER && NeighborsValue(op_plus,variable##state_variable,NULL)>=1)	\
+	Def( variable##state_variable##distance_variable##STATE    ,   c->variable==state_variable 	   )																		\
+	Def( variable##state_variable##distance_variable##DISTANCE			 ,   c->distance_variable		  	   )																		\
+	if(readme->variable!=state_variable && readme->state!=ROCK && readme->state!=WATER && NeighborsValue(op_plus,variable##state_variable##distance_variable##STATE,NULL)>=1)	\
 	{ 																																      			\
 		writeme->distance_variable=1;																												\
 	}																																				\
@@ -19,9 +19,9 @@ void Automat_Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Ce
 	if(readme->variable!=state_variable && readme->state!=WATER && readme->state!=ROCK)																\
 	{ 																																				\
 	    if(readme->state==STREET)																													\
-	      writeme->distance_variable=NeighborsValue(op_min,distance_variable,NULL)+0.5;																\
+	      writeme->distance_variable=op_min(NeighborsValue(op_min,variable##state_variable##distance_variable##DISTANCE,NULL)+0.5,writeme->distance_variable);							\
 		else 																																		\
-		  writeme->distance_variable=NeighborsValue(op_min,distance_variable,NULL)+1;																\
+		  writeme->distance_variable=op_min(NeighborsValue(op_min,variable##state_variable##distance_variable##DISTANCE,NULL)+1,writeme->distance_variable);							\
 	}																																				\
 	if(readme->state==ROCK || readme->state==WATER || (readme->person!=not_a_person && readme->lastchange>0))										\
 	{																																				\
@@ -29,7 +29,7 @@ void Automat_Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Ce
 	}
 	//// ^ AN OBSTACLE DELETES PATH INFO PERSONS AND RESOURCES - PEOPLE STANDING AROUND ARE ALSO OBSTACLES BUT ONLY PATH INFO GETS REMOVED //////////
 	
-#define Person_Minimizes(job,distance_variable)																															\
+#define Person_Minimizes(job,distance_variable)				\
 	Def( job##has_job_and_higher_goal_distance_than , c->person==job && c->distance_variable > readme->distance_variable ) 												\
 	if((t%2==0 || readme->state==STREET) && readme->person==not_a_person && readme->state!=WATER && readme->state!=ROCK && NeighborsValue(op_or,job##has_job_and_higher_goal_distance_than,readme))\
 	{																																									\
@@ -38,5 +38,11 @@ void Automat_Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Ce
 		SetCell(first->i,first->j,Cell,person,0);  																														\  
 	}
 	//^ side effect be careful, but we don't want clones.
+	
+#define Interaction(variable1,value1,variable2,value2,triggers,event1,event2)									\
+	Def( variable1##value1##variable2##value2    ,   c->variable1==value1)										\
+	Def( variable2##value2##variable1##value1    ,   c->variable2==value2 )										\
+	if(readme->variable1==value1 && NeighborsValue(op_or,variable2##value2##variable1##value1,NULL)){event1;}	\
+	if(readme->variable2==value2 && NeighborsValue(op_or,variable1##value1##variable2##value2,NULL)){event2;}
 
 #endif
