@@ -1,0 +1,48 @@
+varying vec2 cord;
+uniform sampler2D tex;
+uniform int worldsize;
+uniform int t;
+
+vec4 sobel_normal(float texelSize) 										//geglätteter normalvektor welcher die position des texels im vertex berücksichtigt
+{
+	float normal_factor=4;
+    float tl=abs(texture2D(tex,cord+texelSize*vec2(-1,-1)).r); 			//top left
+    float  l=abs(texture2D(tex,cord+texelSize*vec2(-1, 0)).r); 			//left
+    float bl=abs(texture2D(tex,cord+texelSize*vec2(-1, 1)).r); 			//bottom left
+    float  t=abs(texture2D(tex,cord+texelSize*vec2( 0,-1)).r); 			//top
+    float  b=abs(texture2D(tex,cord+texelSize*vec2( 0, 1)).r); 			//bottom
+    float tr=abs(texture2D(tex,cord+texelSize*vec2( 1,-1)).r); 			//top right
+    float  r=abs(texture2D(tex,cord+texelSize*vec2( 1, 0)).r); 			//right
+    float br=abs(texture2D(tex,cord+texelSize*vec2( 1, 1)).r); 			//bottom right
+    float dX=tr+2*r+br-tl-2*l-bl;
+    float dY=bl+2*b+br-tl-2*t-tr;
+    vec4 N=vec4(normalize(vec3(dX,1.0f/normal_factor,dY)),1.0);
+    return N*0.5f+0.5f;
+}
+void main()
+{
+	float texelSize=1/(float)worldsize;
+	vec4 texcolor=texture2D(tex, cord);
+	if(texcolor.b>texcolor.g)											//it is water
+	{
+		gl_FragColor=gl_Color*texcolor;
+		gl_FragColor+=0.02*sin(cord.x*worldsize+0.1*t)*cos(cord.y*worldsize+0.1*t);
+		return;
+	}		
+	////////////////// PARAMETERS //////////////////////////////////////					
+    vec4 camera_position     = vec4(0,10,0,1);								
+    vec4 material_diffuse    = vec4(0.8,1,0.6,1);
+	vec4 material_specular   = vec4(0,0,0,1);
+	float material_shininess = 0.1;
+	vec4 light_specular      = vec4(0.0,0.0,0.0,1); 					
+	vec4 light_diffuse       = vec4(0.7,0.7,0.7,1);
+	vec4 light_position 	 = vec4(20,20,20,1);
+	////////////////////////////////////////////////////////////////////
+	vec4 s=-normalize(camera_position-light_position);					//light
+	vec3 n=sobel_normal(texelSize);
+	vec3 r=normalize(-reflect(s.xyz,n));
+	vec3 v=normalize(-light_position.xyz);
+	vec4 diffuse_color=vec4(material_diffuse.xyz*max(0.0,dot(n,s.xyz)),1)*light_diffuse*texcolor*texcolor;
+	vec4 specular=light_specular*material_specular*pow(max(0.0,dot(r,v)),material_shininess);
+	gl_FragColor=diffuse_color+specular;
+}	

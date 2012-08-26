@@ -1,0 +1,8 @@
+varying vec2 cord;
+
+void main()
+{
+    gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex; 			//vertex transformation
+	gl_FrontColor = gl_Color;											//use openGL color
+    cord = vec2(gl_MultiTexCoord0);										//texture coordinate of texture unit0 needs to go to the pixelshader
+}

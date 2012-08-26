@@ -17,12 +17,28 @@ void Draw_Set_HeightmapChanged()
 {
 	HeightmapChanged=1;
 }
+int inited=0,shader,shader_t,shader_worldsize;
 void draw()
 {
 	int i,j,k=0;
+	if(!inited && ALLOW_SHADERS)
+	{
+		shader=hshade_CreateShaderPair("vertexshader.txt","pixelshader.txt");
+		shader_t=glGetUniformLocation(shader,"t");
+		shader_worldsize=glGetUniformLocation(shader,"worldsize");
+		inited=1;
+	}
+	if(ALLOW_SHADERS)
+	{
+		glUseProgram(shader);
+		glUniform1i(shader_t,automat->t);
+		glUniform1i(shader_worldsize,automat->n);
+	}
 	hrend_SelectColor(0.45, 0.59, 0.31,1);
 	hrend_DrawObj(worldsize/2-0.25,worldsize/2-0.25,0,worldsize/2,1,GPUTex);
-	float *toGPU=(float*)malloc(worldsize*worldsize*4*sizeof(float));	//maybe letter not here but i don't want it global!
+	if(ALLOW_SHADERS)
+		glUseProgram(0);
+	float *toGPU=(float*)malloc(worldsize*worldsize*4*sizeof(float));	//maybe later not here but i don't want it global!
 	for(j=automat->n-1;j>=0;j--)										//iterate through for(i=automat->n-1;i>0;i--)	
 	{
 		for(i=automat->n-1;i>=0;i--)									//the grid
@@ -30,7 +46,7 @@ void draw()
 			Cell *c=((Cell*)automat->readCells[i][j]);
 			if(c->state!=WATER)
 			{
-				toGPU[k]=0.5+((Cell*)automat->readCells[i][j])->height/15.0; k++;	//use texture for rendering instead in mode 0
+				toGPU[k]=0.4+((Cell*)automat->readCells[i][j])->height/15.0; k++;	//use texture for rendering instead in mode 0 //0.5 0.6 0.2
 				toGPU[k]=0.6+((Cell*)automat->readCells[i][j])->height/15.0; k++;
 				toGPU[k]=0.2+((Cell*)automat->readCells[i][j])->height/15.0+((Cell*)automat->readCells[i][j])->wateramount/5.0; k++;
 			}

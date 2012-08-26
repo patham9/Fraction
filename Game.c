@@ -34,7 +34,7 @@ void Game_Init()
 	////////////////////////// OTHER INIT STUFF ///////////////////////////////////////////////////////////////
 	type=BASE;
 	srand(WORLD);
-	landscape=Generate_PerlinNoise(worldsize,worldsize,Generate_WhiteNoise(worldsize,worldsize),8,2);
+	landscape=Generate_PerlinNoise(worldsize,worldsize,Generate_WhiteNoise(worldsize,worldsize),8,0);
 	automat=Hauto_OBJ_NEW(10,worldsize,Automat_Simulate,Cell_NEW);
 	Generate_World();
 	Thread_NEW(Game_Thread,NULL);

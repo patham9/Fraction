@@ -3,6 +3,7 @@
 
 #include "Hamlib/Hauto.h"
 #include "Hamlib/Hrend.h"
+#include "Hamlib/Hshade.h"
 
 //very mighty for "visual debugging" the cellular automat! but slows rendering down!
 #define debugdraw_enabled_default 0
