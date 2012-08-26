@@ -9,7 +9,7 @@ void Game_Thread()
 {
 	while(1)
 	{
-		Hauto_OBJ_Exec(automat); 
+		Hauto_OBJ_Exec(automat);
 		Wait(0.001);
 	}					
 }

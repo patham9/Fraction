@@ -27,12 +27,14 @@ void main()
 {
 	float texelSize=1/(float)worldsize;
 	vec4 texcolor=texture2D(tex, cord);
-	if(texcolor.b>texcolor.g)											//it is water
+	float type=texcolor.a;
+	if(type>0.66)//water
 	{
 		gl_FragColor=gl_Color*texcolor;
-		gl_FragColor+=0.02*sin(cord.x*worldsize+0.1*t)*cos(cord.y*worldsize+0.1*t);
+		gl_FragColor+=0.02*sin(cord.x*worldsize+0.1*t)*cos(cord.y*worldsize+0.1*t)+vec4(0,0,0.15,0);
 		return;
-	}		
+	}
+	texcolor=vec4(texcolor.rgb,1);	
 	////////////////// PARAMETERS //////////////////////////////////////					
     vec4 camera_position     = vec4(0,10,0,1);								
     vec4 material_diffuse    = vec4(0.8,1,0.6,1);
@@ -50,4 +52,8 @@ void main()
 	vec4 specular=light_specular*material_specular*pow(max(0.0,dot(r,v)),material_shininess);
 	float rnd=random(cord.x*1000.0,cord.y*1000.0);
 	gl_FragColor=diffuse_color+specular+0.07*vec4(rnd,rnd,rnd,1);
+	if(type<0.66 && type>0.33)//cloud
+	{
+		gl_FragColor+=vec4(0.05,0.05,0.05,0);
+	}
 }	

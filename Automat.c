@@ -11,13 +11,13 @@ void Pathfinding_Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* lef
 	Person_Minimizes(homecomer,  house_distance);
 }
 Def( being_a_person     , c->person!=not_a_person   )
-Def( being_a_worker , c->person==worker     )  
+Def( being_a_worker , c->person==worker     		)  
 Def( has_command     	, c->has_command            )
 void Person_Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* right,Cell* up,Cell* down,Cell* left_up,Cell* left_down,Cell* right_up,Cell* right_down,Cell ***readcells)
 { 
 	/////////// A ROCKFELLER WHO FINDS A TREE DESTROYS IT AND BRINGS IT HOME ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	Interaction(person,worker,state,FOREST,triggers,writeme_person(homecomer),writeme_state(GRASS));
-	/////////// A PERSON BROUGHT WOOD BACK GOES INTO THE HOUSE AND BUILDS THIS CITY ON ROCK'N ROLL ///////////////////////////////////////////////////////////////////////////////////////////
+	/////////// A PERSON BROUGHT WOOD BACK GOES INTO THE HOUSE AND BUILDS THIS CITY ON ROCK'N ROLL, FOR MORE INFO READ THIS: http://www.youtube.com/watch?v=DnUSGAi9j8I /////////////////////////////
 	if(readme->person==homecomer && readme->state!=HOUSE && NeighborsValue(op_or,being_a,HOUSE))
 	{
 		writeme_person(not_a_person);
@@ -72,7 +72,46 @@ void Water_Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell
 		writeme->rootwater=NULL;
 	}
 }
-void Weather_Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* right,Cell* up,Cell* down,Cell* left_up,Cell* left_down,Cell* right_up,Cell* right_down,Cell ***readcells){}
+Def( having_cloud          , c->cloud                             )
+Def( not_water_and_higher_than           , c->state!=WATER && c->height > ref->height              )
+void Weather_Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* right,Cell* up,Cell* down,Cell* left_up,Cell* left_down,Cell* right_up,Cell* right_down,Cell ***readcells)
+{
+	/////////// CLOUDS COME FROM EAST ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	if(i==automat->n-2 && frnd()>0.999)
+	{
+		writeme_cloud(1);
+	}
+	/////////// AND GO FROM EAST TO WEST /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	if(readme->cloud)
+	{
+		writeme_cloud(0);
+	}
+	if(right->cloud)
+	{
+		if(frnd()<0.999)
+			writeme_cloud(1);
+		else
+	////////// BUT SOMETIMES THE CLOUD GETS DESTROYED BECAUSE IT RAINS //////////////////////////////////////////////////////////////////////////////////////////////////
+		if(frnd()<0.99)
+		{
+			writeme->wateramount=1;
+		}
+	////////// AND IN SOME RARE CASES SOMETHING REALLY BAD HAPPENS //////////////////////////////////////////////////////////////////////////////////////////////////////
+		else
+		{
+			writeme->rootwater=FirstNeighbor(not_water_and_higher_than,readme);
+            if(writeme->rootwater!=NULL)
+            {
+                writeme_state(WATER);
+            }
+		}
+	}
+	/////////// CLOUDS CAN GROW, AND FASTER IF THERE IS WATER UNDER IT ///////////////////////////////////////////////////////////////////////////////////////////////////
+	if(readme->state==WATER && NeighborsValue(op_plus,having_cloud,NULL)>=3 && frnd()>0.9 || NeighborsValue(op_plus,having_cloud,NULL)>=1 && frnd()>0.99)
+	{
+		writeme_cloud(1);
+	}
+}
 void Automat_Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* right,Cell* up,Cell* down,Cell* left_up,Cell* left_down,Cell* right_up,Cell* right_down,Cell ***readcells)
 {
 	memcpy(writeme,readme,sizeof(Cell));

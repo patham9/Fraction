@@ -39,24 +39,35 @@ void draw()
 	if(ALLOW_SHADERS)
 		glUseProgram(0);
 	float *toGPU=(float*)malloc(worldsize*worldsize*4*sizeof(float));	//maybe later not here but i don't want it global!
-	for(j=automat->n-1;j>=0;j--)										//iterate through for(i=automat->n-1;i>0;i--)	
+	for(j=automat->n-1;j>=0;j--)										//iterate through
 	{
 		for(i=automat->n-1;i>=0;i--)									//the grid
 		{	
 			Cell *c=((Cell*)automat->readCells[i][j]);
 			if(c->state!=WATER)
 			{
-				toGPU[k]=0.4+((Cell*)automat->readCells[i][j])->height/15.0; k++;	//use texture for rendering instead in mode 0 //0.5 0.6 0.2
-				toGPU[k]=0.6+((Cell*)automat->readCells[i][j])->height/15.0; k++;
-				toGPU[k]=0.2+((Cell*)automat->readCells[i][j])->height/15.0+((Cell*)automat->readCells[i][j])->wateramount/5.0; k++;
+				toGPU[k]=(c->cloud && !ALLOW_SHADERS)*0.2+0.4+((Cell*)automat->readCells[i][j])->height/15.0; k++;	//use texture for rendering instead in mode 0 //0.5 0.6 0.2
+				toGPU[k]=(c->cloud && !ALLOW_SHADERS)*0.2+0.6+((Cell*)automat->readCells[i][j])->height/15.0; k++;
+				toGPU[k]=(c->cloud && !ALLOW_SHADERS)*0.2+0.2+((Cell*)automat->readCells[i][j])->height/15.0+((Cell*)automat->readCells[i][j])->wateramount/5.0; k++;
 			}
 			else
 			{
-				toGPU[k]=0.5; k++;	//use texture for rendering instead in mode 0
-				toGPU[k]=0.7; k++;
-				toGPU[k]=1; k++;
+				toGPU[k]=(c->cloud && !ALLOW_SHADERS)*0.2+0.5; k++;	//use texture for rendering instead in mode 0
+				toGPU[k]=(c->cloud && !ALLOW_SHADERS)*0.2+0.7; k++;
+				toGPU[k]=(c->cloud && !ALLOW_SHADERS)*0.2+1;   k++;
 			}
-			toGPU[k]=1.0; k++;
+			if(!ALLOW_SHADERS)
+				toGPU[k]=1;
+			else
+			{
+				if(c->cloud)
+					toGPU[k]=0.5;//cloud
+				if(c->state==WATER)
+					toGPU[k]=1;//water
+				if(c->state==WATER && c->cloud)
+					toGPU[k]=0.75;//water&cloud
+			}
+			k++;
 		}
 	}
 	glActiveTexture(GL_TEXTURE0);										//give data to GPU
