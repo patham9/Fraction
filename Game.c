@@ -20,16 +20,16 @@ void Game_Init()
 	hrend_2Dmode(0.5,0.6,0.5);
 	gui_Init();
 	////////////////////////// LOAD TEXTURES ///////////////////////////////////////////////////////////////
-	hfio_LoadTex("command.tga",&COMMAND);
-	hfio_LoadTex("forest.tga",&FOREST);
-	hfio_LoadTex("street.tga",&STREET);
-	hfio_LoadTex("street_men.tga",&STREET_MEN);
-	hfio_LoadTex("house.tga",&HOUSE);
-	hfio_LoadTex("rock.tga",&ROCK);
-	hfio_LoadTex("rock.tga",&GPUTex);
-	hfio_LoadTex("house_men.tga",&HOUSE_MEN);
-	hfio_LoadTex("grass_men.tga",&GRASS_MEN);
-	hfio_LoadTex("forest_men.tga",&FOREST_MEN);
+	hfio_LoadTex("textures/command.tga",&COMMAND);
+	hfio_LoadTex("textures/forest.tga",&FOREST);
+	hfio_LoadTex("textures/street.tga",&STREET);
+	hfio_LoadTex("textures/street_men.tga",&STREET_MEN);
+	hfio_LoadTex("textures/house.tga",&HOUSE);
+	hfio_LoadTex("textures/rock.tga",&ROCK);
+	hfio_LoadTex("textures/rock.tga",&GPUTex);
+	hfio_LoadTex("textures/house_men.tga",&HOUSE_MEN);
+	hfio_LoadTex("textures/grass_men.tga",&GRASS_MEN);
+	hfio_LoadTex("textures/forest_men.tga",&FOREST_MEN);
 	WATER=102;GRASS=101;
 	////////////////////////// OTHER INIT STUFF ///////////////////////////////////////////////////////////////
 	type=BASE;

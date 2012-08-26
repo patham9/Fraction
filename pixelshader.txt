@@ -3,6 +3,10 @@ uniform sampler2D tex;
 uniform int worldsize;
 uniform int t;
 
+float random(float x,float y) 									//simple random generator
+{
+    return fract((cos(dot(vec2(x,y),vec2(12.9898,78.233)))*43758.5453));
+}
 vec4 sobel_normal(float texelSize) 										//geglätteter normalvektor welcher die position des texels im vertex berücksichtigt
 {
 	float normal_factor=4;
@@ -44,5 +48,6 @@ void main()
 	vec3 v=normalize(-light_position.xyz);
 	vec4 diffuse_color=vec4(material_diffuse.xyz*max(0.0,dot(n,s.xyz)),1)*light_diffuse*texcolor*texcolor;
 	vec4 specular=light_specular*material_specular*pow(max(0.0,dot(r,v)),material_shininess);
-	gl_FragColor=diffuse_color+specular;
+	float rnd=random(cord.x*1000.0,cord.y*1000.0);
+	gl_FragColor=diffuse_color+specular+0.07*vec4(rnd,rnd,rnd,1);
 }	
