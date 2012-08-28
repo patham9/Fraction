@@ -4,12 +4,17 @@
 #include "Generate.h"
 #include "Draw.h"
 #include "gui.h"
+#include "Statistics.h"
 
 void Game_Thread() 
 {
+	Statistics *s=statistics_new();
 	while(1)
 	{
-		Hauto_OBJ_Exec(automat);
+		statistics_next(automat,s);
+		Hauto_OBJ_Exec(automat,s);
+		if(automat->t%10==0)
+			printf("%f people\n",s->amount_of_people);
 		Wait(0.001);
 	}					
 }
@@ -35,7 +40,7 @@ void Game_Init()
 	type=BASE;
 	srand(WORLD);
 	landscape=Generate_PerlinNoise(worldsize,worldsize,Generate_WhiteNoise(worldsize,worldsize),8,0);
-	automat=Hauto_OBJ_NEW(10,worldsize,Automat_Simulate,Cell_NEW);
+	automat=Hauto_OBJ_NEW(worldsize,Automat_Simulate,Cell_NEW);
 	Generate_World();
 	Thread_NEW(Game_Thread,NULL);
 }

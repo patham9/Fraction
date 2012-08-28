@@ -2,7 +2,7 @@
 #include "Game.h"
 #include "Draw.h"
 
-void Pathfinding_Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* right,Cell* up,Cell* down,Cell* left_up,Cell* left_down,Cell* right_up,Cell* right_down,Cell ***readcells)
+void Pathfinding_Simulate(Statistics* stats,int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* right,Cell* up,Cell* down,Cell* left_up,Cell* left_down,Cell* right_up,Cell* right_down,Cell ***readcells)
 {
 	Distributes_Path_Information(state,FOREST,command_distance);
 	Distributes_Path_Information(has_command,1,command_distance);
@@ -13,7 +13,7 @@ void Pathfinding_Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* lef
 Def( being_a_person     , c->person!=not_a_person   )
 Def( being_a_worker , c->person==worker     		)  
 Def( has_command     	, c->has_command            )
-void Person_Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* right,Cell* up,Cell* down,Cell* left_up,Cell* left_down,Cell* right_up,Cell* right_down,Cell ***readcells)
+void Person_Simulate(Statistics* stats,int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* right,Cell* up,Cell* down,Cell* left_up,Cell* left_down,Cell* right_up,Cell* right_down,Cell ***readcells)
 { 
 	/////////// A ROCKFELLER WHO FINDS A TREE DESTROYS IT AND BRINGS IT HOME ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	Interaction(person,worker,state,FOREST,triggers,writeme_person(homecomer),writeme_state(GRASS));
@@ -34,10 +34,10 @@ void Person_Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cel
 	/////////// A WORKER COMING TO A WORKING PLACE EXECUTES HIS JOB THERE ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	Interaction(has_command,1,person,worker,triggers,{writeme_state(readme->command); writeme->has_command=0;},);
 }
-void Population_Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* right,Cell* up,Cell* down,Cell* left_up,Cell* left_down,Cell* right_up,Cell* right_down,Cell ***readcells)
+void Population_Simulate(Statistics* stats,int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* right,Cell* up,Cell* down,Cell* left_up,Cell* left_down,Cell* right_up,Cell* right_down,Cell ***readcells)
 {
-	/////////// A HOUSE HAS A POSSIBILITY FOR SPAWNING PEOPLE ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	if(readme->state==HOUSE && drnd()>0.9999)
+	/////////// A HOUSE HAS A POSSIBILITY FOR SPAWNING PEOPLE, BUT ONLY TILL A MAX AMOUNT OF PEOPLE //////////////////////////////////////////////////////////////////////////////////////////////
+	if(readme->state==HOUSE && drnd()>0.9995 && stats->amount_of_people<100)
 		writeme_person(worker);
 	/////////// DEATH BY ROCK OR WATER ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	if(readme->state==ROCK || readme->state==WATER) //death by rock or water
@@ -45,13 +45,13 @@ void Population_Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left
 }
 Def( water_amount          , c->wateramount                             )
 Def( water_and_higher_than , c->state==WATER && c->height > ref->height )
-void Vegetation_Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* right,Cell* up,Cell* down,Cell* left_up,Cell* left_down,Cell* right_up,Cell* right_down,Cell ***readcells)
+void Vegetation_Simulate(Statistics* stats,int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* right,Cell* up,Cell* down,Cell* left_up,Cell* left_down,Cell* right_up,Cell* right_down,Cell ***readcells)
 {
 	/////////// A CELL WHICH IS GRASS AND HAS 3 WOOD NEIGHBORS AND ENOUGH GROUND WATER BECOMES FOREST ////////////////////////////////////////////////////////////////////////////////////////
 	if(t%50==0 && readme->state==GRASS && NeighborsValue(op_plus,being_a,FOREST)==3 && NeighborsValue(op_plus,water_amount,NULL)/N>0.1)
 		writeme_state(FOREST);
 }
-void Water_Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* right,Cell* up,Cell* down,Cell* left_up,Cell* left_down,Cell* right_up,Cell* right_down,Cell ***readcells)
+void Water_Simulate(Statistics* stats,int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* right,Cell* up,Cell* down,Cell* left_up,Cell* left_down,Cell* right_up,Cell* right_down,Cell ***readcells)
 {
 	/////////// WATER DELIVERS MAXIMUM GROUND WATER TO ITS SURROUNDING ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	if(readme->state==WATER)
@@ -74,7 +74,7 @@ void Water_Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell
 }
 Def( having_cloud          				 , c->cloud                             				   )
 Def( not_water_and_higher_than           , c->state!=WATER && c->height > ref->height              )
-void Weather_Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* right,Cell* up,Cell* down,Cell* left_up,Cell* left_down,Cell* right_up,Cell* right_down,Cell ***readcells)
+void Weather_Simulate(Statistics* stats,int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* right,Cell* up,Cell* down,Cell* left_up,Cell* left_down,Cell* right_up,Cell* right_down,Cell ***readcells)
 {
 	/////////// CLOUDS COME FROM EAST ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	if(i==automat->n-2 && frnd()>0.999)
@@ -112,18 +112,18 @@ void Weather_Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Ce
 		writeme_cloud(1);
 	}
 }
-void Automat_Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* right,Cell* up,Cell* down,Cell* left_up,Cell* left_down,Cell* right_up,Cell* right_down,Cell ***readcells)
+void Automat_Simulate(Statistics* stats,int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* right,Cell* up,Cell* down,Cell* left_up,Cell* left_down,Cell* right_up,Cell* right_down,Cell ***readcells)
 {
 	memcpy(writeme,readme,sizeof(Cell));
 	writeme->lastchange++;
 	writeme->command_distance=10000;
 	writeme->house_distance=10000;
 	writeme->locked=0;
-	Water_Simulate(t,i,j,writeme,readme,left,right,up,down,left_up,left_down,right_up,right_down,readcells);
-	Vegetation_Simulate(t,i,j,writeme,readme,left,right,up,down,left_up,left_down,right_up,right_down,readcells);
-	Pathfinding_Simulate(t,i,j,writeme,readme,left,right,up,down,left_up,left_down,right_up,right_down,readcells);
-	Person_Simulate(t,i,j,writeme,readme,left,right,up,down,left_up,left_down,right_up,right_down,readcells);
-	Population_Simulate(t,i,j,writeme,readme,left,right,up,down,left_up,left_down,right_up,right_down,readcells);
-	Weather_Simulate(t,i,j,writeme,readme,left,right,up,down,left_up,left_down,right_up,right_down,readcells);
+	Water_Simulate(stats,t,i,j,writeme,readme,left,right,up,down,left_up,left_down,right_up,right_down,readcells);
+	Vegetation_Simulate(stats,t,i,j,writeme,readme,left,right,up,down,left_up,left_down,right_up,right_down,readcells);
+	Pathfinding_Simulate(stats,t,i,j,writeme,readme,left,right,up,down,left_up,left_down,right_up,right_down,readcells);
+	Person_Simulate(stats,t,i,j,writeme,readme,left,right,up,down,left_up,left_down,right_up,right_down,readcells);
+	Population_Simulate(stats,t,i,j,writeme,readme,left,right,up,down,left_up,left_down,right_up,right_down,readcells);
+	Weather_Simulate(stats,t,i,j,writeme,readme,left,right,up,down,left_up,left_down,right_up,right_down,readcells);
 }
 

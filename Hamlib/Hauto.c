@@ -1,6 +1,6 @@
 #include "Hauto.h"
 
-Hauto_OBJ *Hauto_OBJ_NEW(int nstatistics,int n,void (*Exec)(int t,int i,int j,void *writeme,void* readme,void* left,void* right,void* up,void* down,
+Hauto_OBJ *Hauto_OBJ_NEW(int n,void (*Exec)(void* statistics,int t,int i,int j,void *writeme,void* readme,void* left,void* right,void* up,void* down,
                                void* left_up,void* left_down,void* right_up,void* right_down),void* (*New_Cell)(int,int))
 {
 	int i,j;
@@ -22,7 +22,7 @@ Hauto_OBJ *Hauto_OBJ_NEW(int nstatistics,int n,void (*Exec)(int t,int i,int j,vo
 	}
     return ret;
 }
-void Hauto_OBJ_Exec(Hauto_OBJ *aut)
+void Hauto_OBJ_Exec(Hauto_OBJ *aut,void *statistics)
 {
 	int i,j;
 	aut->t++;
@@ -30,7 +30,7 @@ void Hauto_OBJ_Exec(Hauto_OBJ *aut)
 	{
 		for(j=1;j<aut->n-1;j++)
 		{
-			aut->Exec(aut->t,i,j,aut->writeCells[i][j],aut->readCells[i][j],aut->readCells[i-1][j],aut->readCells[i+1][j],aut->readCells[i][j+1],aut->readCells[i][j-1],
+			aut->Exec(statistics,aut->t,i,j,aut->writeCells[i][j],aut->readCells[i][j],aut->readCells[i-1][j],aut->readCells[i+1][j],aut->readCells[i][j+1],aut->readCells[i][j-1],
 			          aut->readCells[i-1][j+1],aut->readCells[i-1][j-1],aut->readCells[i+1][j+1],aut->readCells[i+1][j-1],aut->readCells);
 		}
 	}
