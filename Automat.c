@@ -17,10 +17,10 @@ void Person_Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cel
 { 
 	/////////// A ROCKFELLER WHO FINDS A TREE DESTROYS IT AND BRINGS IT HOME ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	Interaction(person,worker,state,FOREST,triggers,writeme_person(homecomer),writeme_state(GRASS));
-	/////////// A PERSON BROUGHT WOOD BACK GOES INTO THE HOUSE AND BUILDS THIS CITY ON ROCK'N ROLL, FOR MORE INFO READ THIS: http://www.youtube.com/watch?v=DnUSGAi9j8I /////////////////////////////
+	/////////// A PERSON BROUGHT WOOD BACK BUILDS THIS CITY ON ROCK'N ROLL, FOR MORE INFO READ THIS: http://www.youtube.com/watch?v=DnUSGAi9j8I /////////////////////////////
 	if(readme->person==homecomer && readme->state!=HOUSE && NeighborsValue(op_or,being_a,HOUSE))
 	{
-		writeme_person(not_a_person);
+		writeme_person(worker);
 		if(NeighborsValue(op_or,being_a,WATER))
 			writeme->state=ROCK;
 		else
@@ -37,7 +37,7 @@ void Person_Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cel
 void Population_Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* right,Cell* up,Cell* down,Cell* left_up,Cell* left_down,Cell* right_up,Cell* right_down,Cell ***readcells)
 {
 	/////////// A HOUSE HAS A POSSIBILITY FOR SPAWNING PEOPLE ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	if(readme->state==HOUSE && drnd()>0.99)
+	if(readme->state==HOUSE && drnd()>0.9999)
 		writeme_person(worker);
 	/////////// DEATH BY ROCK OR WATER ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	if(readme->state==ROCK || readme->state==WATER) //death by rock or water
@@ -72,7 +72,7 @@ void Water_Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell
 		writeme->rootwater=NULL;
 	}
 }
-Def( having_cloud          , c->cloud                             )
+Def( having_cloud          				 , c->cloud                             				   )
 Def( not_water_and_higher_than           , c->state!=WATER && c->height > ref->height              )
 void Weather_Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* right,Cell* up,Cell* down,Cell* left_up,Cell* left_down,Cell* right_up,Cell* right_down,Cell ***readcells)
 {
@@ -118,6 +118,7 @@ void Automat_Simulate(int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Ce
 	writeme->lastchange++;
 	writeme->command_distance=10000;
 	writeme->house_distance=10000;
+	writeme->locked=0;
 	Water_Simulate(t,i,j,writeme,readme,left,right,up,down,left_up,left_down,right_up,right_down,readcells);
 	Vegetation_Simulate(t,i,j,writeme,readme,left,right,up,down,left_up,left_down,right_up,right_down,readcells);
 	Pathfinding_Simulate(t,i,j,writeme,readme,left,right,up,down,left_up,left_down,right_up,right_down,readcells);

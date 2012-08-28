@@ -13,6 +13,7 @@ void mouse_down(EventArgs *e)
 			if(type==BASE)
 			{
 				SetCell(i,j,Cell,state,HOUSE);								//set the cell to the selected type on left mouse
+				SetCell(i,j,Cell,person,worker);							//also place someone
 			}
 			else
 			{

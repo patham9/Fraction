@@ -24,6 +24,7 @@ typedef struct
 	void *rootwater; 
 	
 	//path-finding:
+	int locked;
 	float command_distance;
 	float house_distance;
 	
