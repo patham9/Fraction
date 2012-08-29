@@ -55,6 +55,7 @@ void mouse_down(EventArgs *e)
 }
 void key_up(EventArgs *e) 
 {
+	mouse_operation=none;
 	if(e->mk=='W'){ type=WATER; }
 	if(e->mk=='R'){ type=ROCK; }
 	if(e->mk=='H'){ type=HOUSE; }
@@ -63,6 +64,7 @@ void key_up(EventArgs *e)
 	if(e->mk=='S'){ type=STREET; }
 	if(e->mk=='B'){ type=BASE; }
 	if(e->mk=='D'){ Draw_Set_DebugDraw(!Draw_Get_DebugDraw()); }
+	if(e->mk=='P'){ mouse_operation=paste; }
 }
 void Button(int i)
 {
@@ -86,7 +88,6 @@ void Button(int i)
 	}
 	else
 	{
-		mouse_operation=none;
 		key_up(&(EventArgs){0,0,i});
 	}
 }
