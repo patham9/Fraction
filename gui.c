@@ -55,7 +55,8 @@ void mouse_down(EventArgs *e)
 }
 void key_up(EventArgs *e) 
 {
-	mouse_operation=none;
+	if(e->mk>'A' && e->mk<'Z')
+		mouse_operation=none;
 	if(e->mk=='W'){ type=WATER; }
 	if(e->mk=='R'){ type=ROCK; }
 	if(e->mk=='H'){ type=HOUSE; }
