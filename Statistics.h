@@ -7,6 +7,7 @@
 typedef struct
 {
 	float amount_of_people;												//no type conversions, statistics uses always float, int doesnt make sense 
+	float amount_of_houses;
 }Statistics;
 
 Statistics* statistics_new();

@@ -25,19 +25,19 @@ void Person_Simulate(Statistics* stats,int t,int i,int j,Cell *writeme,Cell* rea
 			writeme->state=ROCK;
 		else
 		{
-			if(drnd()>0.8)
+			if(drnd()>0.8 && stats->amount_of_houses<MAX_HOUSES)
 				writeme_state(HOUSE);
 			else
 				writeme_state(STREET);
 		}
 	}
 	/////////// A WORKER COMING TO A WORKING PLACE EXECUTES HIS JOB THERE ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	Interaction(has_command,1,person,worker,triggers,{writeme_state(readme->command); writeme->has_command=0;},);
+	Interaction(has_command,1,person,worker,triggers,{if(readme->command!=HOUSE || stats->amount_of_houses<MAX_HOUSES){writeme_state(readme->command);} writeme->has_command=0;},);
 }
 void Population_Simulate(Statistics* stats,int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* right,Cell* up,Cell* down,Cell* left_up,Cell* left_down,Cell* right_up,Cell* right_down,Cell ***readcells)
 {
 	/////////// A HOUSE HAS A POSSIBILITY FOR SPAWNING PEOPLE, BUT ONLY TILL A MAX AMOUNT OF PEOPLE //////////////////////////////////////////////////////////////////////////////////////////////
-	if(readme->state==HOUSE && drnd()>0.9995 && stats->amount_of_people<100)
+	if(readme->state==HOUSE && drnd()>0.9995 && stats->amount_of_people<MAX_PEOPLE)
 		writeme_person(worker);
 	/////////// DEATH BY ROCK OR WATER ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	if(readme->state==ROCK || readme->state==WATER) //death by rock or water

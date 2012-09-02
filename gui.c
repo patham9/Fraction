@@ -55,7 +55,7 @@ void mouse_down(EventArgs *e)
 }
 void key_up(EventArgs *e) 
 {
-	if(e->mk>'A' && e->mk<'Z')
+	if(e->mk>='A' && e->mk<='Z')
 		mouse_operation=none;
 	if(e->mk=='W'){ type=WATER; }
 	if(e->mk=='R'){ type=ROCK; }
