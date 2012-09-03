@@ -42,10 +42,10 @@ void Automat_Simulate(Statistics* stats,int t,int i,int j,Cell *writeme,Cell* re
 	}
 	//^ side effect be careful, but we don't want clones.
 	
-#define Interaction(variable1,value1,variable2,value2,triggers,event1,event2)									\
+#define Interaction(variable1,value1,variable2,value2,triggers,event1,event2,possibility1,possibility2)									\
 	Def( variable1##value1##variable2##value2    ,   c->variable1==value1)										\
 	Def( variable2##value2##variable1##value1    ,   c->variable2==value2 )										\
-	if(readme->variable1==value1 && NeighborsValue(op_or,variable2##value2##variable1##value1,NULL)){event1;}	\
-	if(readme->variable2==value2 && NeighborsValue(op_or,variable1##value1##variable2##value2,NULL)){event2;}
+	if(frnd()<=possibility1 && readme->variable1==value1 && NeighborsValue(op_or,variable2##value2##variable1##value1,NULL)){event1;}	\
+	if(frnd()<=possibility2 && readme->variable2==value2 && NeighborsValue(op_or,variable1##value1##variable2##value2,NULL)){event2;}
 
 #endif

@@ -16,7 +16,7 @@ Def( has_command     	, c->has_command            )
 void Person_Simulate(Statistics* stats,int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* right,Cell* up,Cell* down,Cell* left_up,Cell* left_down,Cell* right_up,Cell* right_down,Cell ***readcells)
 { 
 	/////////// A ROCKFELLER WHO FINDS A TREE DESTROYS IT AND BRINGS IT HOME ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	Interaction(person,worker,state,FOREST,triggers,writeme_person(homecomer),writeme_state(GRASS));
+	Interaction(person,worker,state,FOREST,triggers,writeme_person(homecomer),writeme_state(GRASS),1,0.5);
 	/////////// A PERSON BROUGHT WOOD BACK BUILDS THIS CITY ON ROCK'N ROLL, FOR MORE INFO READ THIS: http://www.youtube.com/watch?v=DnUSGAi9j8I /////////////////////////////
 	if(readme->person==homecomer && readme->state!=HOUSE && NeighborsValue(op_or,being_a,HOUSE))
 	{
@@ -32,7 +32,7 @@ void Person_Simulate(Statistics* stats,int t,int i,int j,Cell *writeme,Cell* rea
 		}
 	}
 	/////////// A WORKER COMING TO A WORKING PLACE EXECUTES HIS JOB THERE ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	Interaction(has_command,1,person,worker,triggers,{if(readme->command!=HOUSE || stats->amount_of_houses<MAX_HOUSES){writeme_state(readme->command);} writeme->has_command=0;},);
+	Interaction(has_command,1,person,worker,triggers,{if(readme->command!=HOUSE || stats->amount_of_houses<MAX_HOUSES){writeme_state(readme->command);} writeme->has_command=0;},,1,1);
 }
 void Population_Simulate(Statistics* stats,int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* right,Cell* up,Cell* down,Cell* left_up,Cell* left_down,Cell* right_up,Cell* right_down,Cell ***readcells)
 {
