@@ -35,7 +35,7 @@ void draw()
 		glUniform1i(shader_worldsize,automat->n);
 	}
 	hrend_SelectColor(0.45, 0.59, 0.31,1);
-	hrend_DrawObj(worldsize/2-0.25,worldsize/2-0.25,0,worldsize/2,1,GPUTex);
+	hrend_DrawObj(worldsize/2-0.5,worldsize/2-0.5,0,worldsize/2,1,GPUTex);
 	if(ALLOW_SHADERS)
 		glUseProgram(0);
 	float *toGPU=(float*)malloc(worldsize*worldsize*4*sizeof(float));	//maybe later not here but i don't want it global!
@@ -77,7 +77,7 @@ void draw()
 	{
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, worldsize, worldsize, 0, GL_RGBA, GL_FLOAT, toGPU);
 		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);	//we need the values direct
-		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);    //GL_NEAREST FOR DEBUG
 		HeightmapChanged=0;
 	}
 	for(i=1;i<automat->n-1;i++)
