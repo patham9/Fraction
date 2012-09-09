@@ -32,7 +32,15 @@ void Person_Simulate(Statistics* stats,int t,int i,int j,Cell *writeme,Cell* rea
 		}
 	}
 	/////////// A WORKER COMING TO A WORKING PLACE EXECUTES HIS JOB THERE ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	Interaction(has_command,1,person,worker,triggers,{if(readme->command!=HOUSE || stats->amount_of_houses<MAX_HOUSES){writeme_state(readme->command);} writeme->has_command=0;},,1,1);
+	Interaction(has_command,1,person,worker,triggers,
+	    if(readme->command==TERRAFORM_DOWN)
+			{writeme->height-=0.1; writeme_state(GRASS);}
+		else if(readme->command==TERRAFORM_UP)
+			{writeme->height+=0.1; writeme_state(GRASS);}
+		else if(readme->command!=HOUSE || stats->amount_of_houses<MAX_HOUSES)
+			writeme_state(readme->command);
+		writeme->has_command=0;
+	,,1,1);
 }
 void Population_Simulate(Statistics* stats,int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* right,Cell* up,Cell* down,Cell* left_up,Cell* left_down,Cell* right_up,Cell* right_down,Cell ***readcells)
 {

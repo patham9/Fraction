@@ -64,7 +64,9 @@ void key_up(EventArgs *e)
 	if(e->mk=='G'){ type=GRASS; }
 	if(e->mk=='S'){ type=STREET; }
 	if(e->mk=='B'){ type=BASE; }
-	if(e->mk=='D'){ Draw_Set_DebugDraw(!Draw_Get_DebugDraw()); }
+	if(e->mk=='U'){ type=TERRAFORM_UP; }
+	if(e->mk=='D'){ type=TERRAFORM_DOWN; }
+	if(e->mk=='Y'){ Draw_Set_DebugDraw(!Draw_Get_DebugDraw()); }
 	if(e->mk=='P'){ mouse_operation=paste; }
 }
 void Button(int i)
@@ -110,4 +112,6 @@ void gui_Init()
 	hgui_AddSimpleElem(0.1,0.96,0.09,0.04,"RIDOWN",Button,rightdown);
 	hgui_AddSimpleElem(0.2,0.96,0.09,0.04,"COPY",Button,copy);
 	hgui_AddSimpleElem(0.3,0.96,0.09,0.04,"PASTE",Button,paste);
+	hgui_AddSimpleElem(0.4,0.96,0.18,0.04,"TERRAFORM UP",Button,'U');
+	hgui_AddSimpleElem(0.59,0.96,0.18,0.04,"TERRAFORM DOWN",Button,'D');
 }
