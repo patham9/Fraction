@@ -14,14 +14,15 @@ void Game_Thread()
 	{
 		if(!SINGLEPLAYER && get_step()==laststep)
 		{
+			laststep=get_step();
 			Wait(0.001);
 			continue;
 		}
-		laststep=get_step();
 		statistics_next(automat,s);
 		Hauto_OBJ_Exec(automat,s);
 		if(automat->t%10==0)
 			printf("%f people\n",s->amount_of_people);
+		laststep=get_step();
 		Wait(0.001);
 	}					
 }
