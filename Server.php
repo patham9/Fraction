@@ -90,13 +90,13 @@ while(true)
 		{
 			try
 			{
-				/*if($socket!=NULL && $socket!=$server)
+				if($socket!=NULL && $socket!=$server)
 				{
-					$stepbuf="1111111111111111111111111";
+					$stepbuf="11111111111111111111";
 					socket_write($socket,$stepbuf,20);
 					flush();
 					ob_flush();
-				}*/
+				}
 			}
 			catch(Exception $e){}
 		}
