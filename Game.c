@@ -9,8 +9,11 @@
 void Game_Thread() 
 {
 	Statistics *s=statistics_new();
+	int laststep=-1;
 	while(1)
 	{
+		if(!SINGLEPLAYER && get_step()==laststep)
+			continue;
 		statistics_next(automat,s);
 		Hauto_OBJ_Exec(automat,s);
 		if(automat->t%10==0)

@@ -9,7 +9,7 @@
 #define ALLOW_SHADERS   0
 #define MAX_HOUSES    200
 #define MAX_PEOPLE	  100
-#define SINGLEPLAYER 	1
+#define SINGLEPLAYER 	0
 
 #define BASE 999
 #define TERRAFORM_DOWN 998
