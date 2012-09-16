@@ -15,14 +15,7 @@
 // SOCKET END
 
 int client=0,player=0,sockfd=0,MOUSE=1,KEY=2,BUTTON=3,ID=4,step;	//global constants once inited
-void client_get_clientid()
-{
-	int i;
-	for(i=0;i<5;i++)
-		write(sockfd,&ID,sizeof(int));
-	for(i=0;i<5;i++)
-		read(sockfd,&client,sizeof(int));
-}
+void client_get_clientid(){}
 int client_connect()
 {
     struct sockaddr_in serv_addr;
@@ -103,7 +96,7 @@ void *client_thread(void *arg)
 		read(sockfd,&req_mk,sizeof(int));
 		read(sockfd,&req_mx,sizeof(int));
 		read(sockfd,&req_my,sizeof(int));
-		//printf("req id %d \n",req_id);
+		printf("req id %d \n",req_id);
 		if(req_id==MOUSE)								
 			gui_mouse_down(req_client,&(EventArgs){req_mx,req_my,req_mk});
 		else

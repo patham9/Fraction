@@ -5,7 +5,7 @@
 #include "Hamlib/Hauto.h"
 
 #define WORLD 		  999
-#define worldsize  	  256
+#define worldsize  	  129
 #define ALLOW_SHADERS   0
 #define MAX_HOUSES    200
 #define MAX_PEOPLE	  100
