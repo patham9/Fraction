@@ -13,7 +13,11 @@ void Game_Thread()
 	while(1)
 	{
 		if(!SINGLEPLAYER && get_step()==laststep)
+		{
+			Wait(0.001);
 			continue;
+		}
+		laststep=get_step();
 		statistics_next(automat,s);
 		Hauto_OBJ_Exec(automat,s);
 		if(automat->t%10==0)
