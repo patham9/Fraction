@@ -6,7 +6,7 @@ SERVER_LDFLAGS = -lm -lpthread -lglfw
 
 HAMLIB_DIR = Hamlib/
 HAMLIB_OBJ = Hrend.o Hinput.o Hcam.o Hnav.o Hfio.o Hgui.o Hutil.o Hshade.o Hauto.o
-OBJ = Draw.o Game.o Automat.o Generate.o Cell.o gui.o Statistics.o
+OBJ = Draw.o Game.o Automat.o Generate.o Cell.o gui.o Statistics.o Client.o
 
 all: prog
 

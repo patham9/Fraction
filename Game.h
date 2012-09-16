@@ -6,9 +6,10 @@
 
 #define WORLD 		  999
 #define worldsize  	  256
-#define ALLOW_SHADERS   1
+#define ALLOW_SHADERS   0
 #define MAX_HOUSES    200
 #define MAX_PEOPLE	  100
+#define SINGLEPLAYER 	1
 
 #define BASE 999
 #define TERRAFORM_DOWN 998

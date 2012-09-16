@@ -2,10 +2,11 @@
 #include "Cell.h"
 #include "Game.h"
 #include "Draw.h"
+#include "Client.h"
 
 enum{none,leftup,rightdown,copy,paste} mouse_operation;
 int lux=0,luy=0,rdx=0,rdy=0,sx=0,sy=0,*data;
-void mouse_down(EventArgs *e)
+void gui_mouse_down(int player,EventArgs *e)
 {		
 	if(e->mk==1)
 	{																
@@ -53,7 +54,7 @@ void mouse_down(EventArgs *e)
 		}			
 	}
 }
-void key_up(EventArgs *e) 
+void gui_key_up(int player,EventArgs *e) 
 {
 	if(e->mk>='A' && e->mk<='Z')
 		mouse_operation=none;
@@ -69,7 +70,7 @@ void key_up(EventArgs *e)
 	if(e->mk=='Y'){ Draw_Set_DebugDraw(!Draw_Get_DebugDraw()); }
 	if(e->mk=='P'){ mouse_operation=paste; }
 }
-void Button(int i)
+void gui_button(int player,int i)
 {
 	int x,y;
 	if(i==none || i==leftup || i==rightdown || i==copy || i==paste)
@@ -91,27 +92,30 @@ void Button(int i)
 	}
 	else
 	{
-		key_up(&(EventArgs){0,0,i});
+		if(client_player()==player)
+		{
+			client_send_key_up(&(EventArgs){0,0,i});
+		}
 	}
 }
 void gui_Init()
 {
-	hinput_AddMouseDown(mouse_down);
-	hinput_AddMouseDragged(mouse_down);
-	hinput_AddKeyUp(key_up);
+	hinput_AddMouseDown(client_send_mouse_down);
+	hinput_AddMouseDragged(client_send_mouse_down);
+	hinput_AddKeyUp(client_send_key_up);
 	hgui_AddSimpleElem(0.0,0,0.09,0.04,"EXIT",exit,0);
-	hgui_AddSimpleElem(0.1,0,0.09,0.04,"WATER",Button,'W');
-	hgui_AddSimpleElem(0.2,0,0.09,0.04,"FOREST",Button,'F');
-	hgui_AddSimpleElem(0.3,0,0.09,0.04,"STREET",Button,'S');
-	hgui_AddSimpleElem(0.4,0,0.09,0.04,"GRASS",Button,'G');
-	hgui_AddSimpleElem(0.5,0,0.09,0.04,"ROCK",Button,'R');
-	hgui_AddSimpleElem(0.6,0,0.09,0.04,"HOUSE",Button,'H');
-	hgui_AddSimpleElem(0.7,0,0.09,0.04,"DEBUG",Button,'D');
-	hgui_AddSimpleElem(0.8,0,0.09,0.04,"BASE",Button,'B');
-	hgui_AddSimpleElem(0.0,0.96,0.09,0.04,"LEFTUP",Button,leftup);
-	hgui_AddSimpleElem(0.1,0.96,0.09,0.04,"RIDOWN",Button,rightdown);
-	hgui_AddSimpleElem(0.2,0.96,0.09,0.04,"COPY",Button,copy);
-	hgui_AddSimpleElem(0.3,0.96,0.09,0.04,"PASTE",Button,paste);
-	hgui_AddSimpleElem(0.4,0.96,0.18,0.04,"TERRAFORM UP",Button,'U');
-	hgui_AddSimpleElem(0.59,0.96,0.18,0.04,"TERRAFORM DOWN",Button,'D');
+	hgui_AddSimpleElem(0.1,0,0.09,0.04,"WATER",client_send_button,'W');
+	hgui_AddSimpleElem(0.2,0,0.09,0.04,"FOREST",client_send_button,'F');
+	hgui_AddSimpleElem(0.3,0,0.09,0.04,"STREET",client_send_button,'S');
+	hgui_AddSimpleElem(0.4,0,0.09,0.04,"GRASS",client_send_button,'G');
+	hgui_AddSimpleElem(0.5,0,0.09,0.04,"ROCK",client_send_button,'R');
+	hgui_AddSimpleElem(0.6,0,0.09,0.04,"HOUSE",client_send_button,'H');
+	hgui_AddSimpleElem(0.7,0,0.09,0.04,"DEBUG",client_send_button,'D');
+	hgui_AddSimpleElem(0.8,0,0.09,0.04,"BASE",client_send_button,'B');
+	hgui_AddSimpleElem(0.0,0.96,0.09,0.04,"LEFTUP",client_send_button,leftup);
+	hgui_AddSimpleElem(0.1,0.96,0.09,0.04,"RIDOWN",client_send_button,rightdown);
+	hgui_AddSimpleElem(0.2,0.96,0.09,0.04,"COPY",client_send_button,copy);
+	hgui_AddSimpleElem(0.3,0.96,0.09,0.04,"PASTE",client_send_button,paste);
+	hgui_AddSimpleElem(0.4,0.96,0.18,0.04,"TERRAFORM UP",client_send_button,'U');
+	hgui_AddSimpleElem(0.59,0.96,0.18,0.04,"TERRAFORM DOWN",client_send_button,'D');
 }

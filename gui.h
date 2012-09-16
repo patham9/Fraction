@@ -6,7 +6,8 @@
 #include "Hamlib/Hinput.h"
 #include "Hamlib/Hgui.h" 
 
-void key_up(EventArgs*e);
-void mouse_down(EventArgs *e);
+void gui_mouse_down(int player,EventArgs *e);
+void gui_key_up(int player,EventArgs *e);
+void gui_button(int player,int i);
 
 #endif
