@@ -10,6 +10,8 @@
 #define MAX_HOUSES    200
 #define MAX_PEOPLE	  100
 #define SINGLEPLAYER 	0
+#define IP "91.203.212.130"
+#define PORT 		10000
 
 #define BASE 999
 #define TERRAFORM_DOWN 998

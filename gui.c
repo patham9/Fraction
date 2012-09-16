@@ -8,7 +8,7 @@ enum{none,leftup,rightdown,copy,paste} mouse_operation;
 int lux=0,luy=0,rdx=0,rdy=0,sx=0,sy=0,*data;
 void gui_mouse_down(int player,EventArgs *e)
 {															
-	int i=(int)(hnav_MouseToWorldCoordX(e->mx)+0.5),j=(int)(hnav_MouseToWorldCoordY(e->my)+0.5),x,y; 
+	int i=e->mx,j=e->my,x,y; 
 	if(i>=0 && j>=0 && i<(automat->n) && j<(automat->n))			//get world coordinates of cursor and check if it is in automat range
 	{
 		if(mouse_operation==none)
