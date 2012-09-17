@@ -102,7 +102,7 @@ while(true)
 		}
 	}
 	$LAST_STEP=$STEP;
-	socket_select($changedSockets, $write = NULL, $except = NULL, 5);
+	socket_select($changedSockets, $write = NULL, $except = NULL, 1);
 	foreach($changedSockets as $socket)
 	{
 	    if($socket == $server)
