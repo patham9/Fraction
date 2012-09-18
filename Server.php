@@ -14,6 +14,8 @@
 $address = '91.203.212.130'; //127.0.0.1
 $port = 10000;
 $players=2;
+$step_usec=500000;
+/*****************************************************************************/
 $cnt_players=0;
 ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -68,7 +70,6 @@ if(!@socket_listen($server))
 	socketError('socket_listen', true);
 }
 $allSockets = array($server);
-$LAST_STEP="";
 while(true)
 {
     echo ' ';
@@ -82,10 +83,9 @@ while(true)
 		break;
 	}
 	$changedSockets = $allSockets;
-	$STEP=date("s");
-	if(strcmp($STEP,$LAST_STEP) && $cnt_players==$players) // !=  World step - Patrick Hammer
+	if($cnt_players==$players) // World step - Patrick Hammer
 	{
-		echo "step<br/>";
+		echo "s";
 		foreach($allSockets as $socket)
 		{
 			try
@@ -101,8 +101,7 @@ while(true)
 			catch(Exception $e){}
 		}
 	}
-	$LAST_STEP=$STEP;
-	socket_select($changedSockets, $write = NULL, $except = NULL, 1);
+	socket_select($changedSockets, $write = NULL, $except = NULL, 0,$step_usec);
 	foreach($changedSockets as $socket)
 	{
 	    if($socket == $server)
@@ -124,6 +123,7 @@ while(true)
             	//socket_read() returned FALSE, meaning that the client has closed the connection.
 	            unset($allSockets[array_search($socket, $allSockets)]);
 	            socket_close($socket);
+	            $cnt_players-=1;
 	        }
 	        else
 	        {
