@@ -18,8 +18,11 @@ void Game_Thread()
 			Wait(0.001);
 			continue;
 		}
+		set_finished(0);
+		Wait(0.001);
 		statistics_next(automat,s);
 		Hauto_OBJ_Exec(automat,s);
+		set_finished(1);
 		if(automat->t%10==0)
 			printf("%f people\n",s->amount_of_people);
 		laststep=get_step();
@@ -45,7 +48,6 @@ void Game_Init()
 	hfio_LoadTex("textures/forest_men.tga",&FOREST_MEN);
 	WATER=102;GRASS=101;
 	////////////////////////// OTHER INIT STUFF ///////////////////////////////////////////////////////////////
-	type=BASE;
 	srand(WORLD);
 	landscape=Generate_PerlinNoise(worldsize,worldsize,Generate_WhiteNoise(worldsize,worldsize),8,0);
 	automat=Hauto_OBJ_NEW(worldsize,Automat_Simulate,Cell_NEW);

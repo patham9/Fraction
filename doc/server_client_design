@@ -1,22 +1,10 @@
 Funktionsumfang fuer Version 0.01:
-	Der Client kann:
-		* Die ganze Karte sehen
-		* Ein und auszoomen (stufenweise)
-		* Dorfbewohner in Echtzeit sehen (UDP)
-		* Zellen setzen
-		* Zellinformationen abfragen
-		
-	Der Server kann:
-		* Mehrere Clienten gleichzeitig verwalten
-		* Die Automatenberechnungen optimieren (Welt in Quadrate aufteilen und die Quadrate zuerst berechnen, die vom Spieler gesehen werden)
-		* Den Traffic optimieren (Komprimierverfahren und nur notwenidge Quadrate an Clienten senden)
-		* Auf Clientbefehle reagieren (Zellen setzen)
+	Der Server, Client, welcher nun nur Klicks mit ClientID und den Metronom-Tick überträgt:
+		* Der Server schickt alles blind weiter,
+		tut aber gleichzeitig einen Zähler verwalten,
+		der erst inkrementiert wird wenn die Clients bestätigen
+		dass sie diesem Zeitschritt zugehörige Events alle bekommen haben
+		und den Automatenschritt vollzogen haben.
 		
 Primaere Strukturaenderungen am vorhandenen Code:
 	* Trennung zwischen Graphik und Automaten und Userinput
-	* Die Welt muss in Quadrate unterteilt werden (max 256x256)
-	* Der Automat muss ein Quadrat unabhaengig von den anderen berechnen koennen
-		- Das sollte keine Probleme machen - evtl. Dorfbewohner boese?
-		- Multithreading
-	* Positionen der Dorfbewohner werden ueber UDP uebergeben
-	* Die Welt ueber TCP

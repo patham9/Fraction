@@ -14,7 +14,7 @@
 $address = '91.203.212.130'; //127.0.0.1
 $port = 10000;
 $players=2;
-$step_usec=500000;
+$step_usec=750000;
 /*****************************************************************************/
 $cnt_players=0;
 ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
@@ -37,6 +37,11 @@ $cnt_players=0;
 <body>
  
 <?php
+function microtime_float()
+{
+    list($usec, $sec) = explode(" ", microtime());
+    return ((float)$usec + (float)$sec);
+}
 set_time_limit(0);
 ob_implicit_flush();
 ignore_user_abort(true);
@@ -70,6 +75,9 @@ if(!@socket_listen($server))
 	socketError('socket_listen', true);
 }
 $allSockets = array($server);
+$lasttime = microtime_float();
+$secs=$step_usec/1000000;
+echo "a step is set to need $secs seconds";
 while(true)
 {
     echo ' ';
@@ -83,7 +91,8 @@ while(true)
 		break;
 	}
 	$changedSockets = $allSockets;
-	if($cnt_players==$players) // World step - Patrick Hammer
+	$curtime=microtime_float();
+	if($cnt_players==$players && $curtime-$lasttime>$step_usec/1000000) // World step - Patrick Hammer
 	{
 		echo "s";
 		foreach($allSockets as $socket)
@@ -100,8 +109,9 @@ while(true)
 			}
 			catch(Exception $e){}
 		}
+		$lasttime = microtime_float();
 	}
-	socket_select($changedSockets, $write = NULL, $except = NULL, 0,$step_usec);
+	socket_select($changedSockets, $write = NULL, $except = NULL, 0,$step_usec/5);
 	foreach($changedSockets as $socket)
 	{
 	    if($socket == $server)
@@ -127,14 +137,7 @@ while(true)
 	        }
 	        else
 	        {
-				//We got useful data from socket_read(), so let's echo it.
-				$stru_req=" req: "+(string)intval($data[0]+$data[1]+$data[2]+$data[3]);
-				$stru_cli=" cli: "+(string)intval($data[4]+$data[5]+$data[6]+$data[7]);
-				$stru_mk=" mk: "+(string)intval($data[8]+$data[9]+$data[10]+$data[11]);
-				$stru_mx=" mx: "+(string)intval($data[12]+$data[13]+$data[14]+$data[15]);
-				$stru_my=" my: "+(string)intval($data[16]+$data[17]+$data[18]+$data[19]);
-				echo "\r\n<p><strong>&middot;</strong> $socket wrote: $stru_req $stru_cli $stru_mk $stru_mx $stru_my </p>"; //$data
-				//but also write it to all clients - Patrick Hammer
+				//We got useful data from socket_read(), so let's write it to all clients - Patrick Hammer
 				foreach($allSockets as $socket)
 				{
 					try

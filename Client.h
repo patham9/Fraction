@@ -11,5 +11,7 @@ void client_send_button(int i);
 int client_client();
 int client_player();
 int get_step();
+int set_finished();
+void set_clientid(int id);
 
 #endif
