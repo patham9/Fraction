@@ -34,6 +34,9 @@ typedef struct
 	
 	//weather:
 	int cloud;
+    
+    //logic:
+    int wavefront; int value; 
 	
 }Cell;
 Cell *Cell_NEW(int i,int j); 		 									//constructor for a new cell called for every cell when the automat constructor is called

@@ -111,9 +111,9 @@ void main()
 	float texelSize=1/(float)worldsize;
 	vec4 texcolor=texture2D(tex, cord);
 	float type=texcolor.a;
-	float snd2=snoise(vec3(cord.x*worldsize*5,cord.y*worldsize*5,0.1*t));
 	if(type>0.66)//water
 	{
+		float snd2=snoise(vec3(cord.x*worldsize*5,cord.y*worldsize*5,0.1*t));
 		float waves2=0.06*sin(cord.x*1000/3+0.1*t)*cos(cord.y*1000/3+0.1*t)+0.02*sin(cord.x*1000*2-0.13*t*2)*cos(cord.y*1000*2-0.1*t*2)+vec4(0,0,0.1,0);
 		gl_FragColor=gl_Color*texcolor;
 		gl_FragColor+=snd2*0.05+abs(snd2)*0.05+waves2*0.5*random(cord.x*worldsize,cord.y*worldsize)*2;
@@ -142,45 +142,4 @@ void main()
 	{
 		gl_FragColor+=vec4(0.05,0.05,0.05,0);
 	}
-	float hr=abs(texcolor.r-texture2D(tex, cord+vec2(0.01,0.01)).r);
-	float hl=abs(texcolor.r-texture2D(tex, cord+vec2(-0.01,0.01)).r);
-	float hu=abs(texcolor.r-texture2D(tex, cord+vec2(0.01,-0.01)).r);
-	float hd=abs(texcolor.r-texture2D(tex, cord+vec2(-0.01,-0.01)).r);
-	float steig=max(hr,hl);
-	steig=max(steig,hu);
-	steig=max(steig,hd);
-	float middle=(gl_FragColor.g+gl_FragColor.r+gl_FragColor.b)/3.0;
-	float sn=snoise(vec3(cord.x*worldsize,cord.y*worldsize,steig));
-	float sn2=snoise(vec3(cord.x*worldsize*20,cord.y*worldsize*20,steig));
-	float sn3=snoise(vec3(cord.x*worldsize/10,cord.y*worldsize/10,steig));
-	float sn4=snoise(vec3(cord.x*worldsize/30,cord.y*worldsize/30,steig));
-	if(steig>0.028 && sn2>0.5) //minifelsen
-	{
-		gl_FragColor.g-=0.2; 
-		gl_FragColor.r+=sn2*0.1;
-		gl_FragColor.b+=sn2*0.5;
-	}
-	if(steig>0.018 && texcolor.r>0.8) //schnee
-	{
-		gl_FragColor.g=0.5+gl_FragColor.r; 
-		gl_FragColor.r=0.5+gl_FragColor.r;
-		gl_FragColor.b=0.5+gl_FragColor.r;
-	}
-	else
-	if(texcolor.r>0.73) //almgras
-	{
-		gl_FragColor.g=0.4+gl_FragColor.r; 
-		gl_FragColor.r=0.1+gl_FragColor.r;
-		gl_FragColor.b-=0.15+gl_FragColor.r;
-	}
-	else
-	if(sn4>0.5 && sn3>0.5 && sn>0.5) //felse
-	{
-		gl_FragColor.g-=0.35+sn*0.1;
-		gl_FragColor.r=gl_FragColor.g;
-		gl_FragColor.b=gl_FragColor.g;
-	}
-	gl_FragColor.g-=0.1;
-	gl_FragColor.b-=0.3;
-	gl_FragColor.r-=0.1;
 }	

@@ -1,7 +1,7 @@
 VERSION = 3.02
 CC      = gcc
 CFLAGS  =  `pkg-config --cflags libglfw` -O2 -Wall -g -D_REENTRANT -DVERSION=\"$(VERSION)\"
-LDFLAGS = -lGL -lGLU -lglut -lGLEW -lglfw -lm -lpthread
+LDFLAGS = -lrt -lGL -lGLU -lglut -lGLEW -lglfw -lm -lpthread
 SERVER_LDFLAGS = -lm -lpthread -lglfw
 
 HAMLIB_DIR = Hamlib/

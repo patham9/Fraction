@@ -56,7 +56,7 @@ Def( water_and_higher_than , c->state==WATER && c->height > ref->height )
 void Vegetation_Simulate(Statistics* stats,int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* right,Cell* up,Cell* down,Cell* left_up,Cell* left_down,Cell* right_up,Cell* right_down,Cell ***readcells)
 {
 	/////////// A CELL WHICH IS GRASS AND HAS 3 WOOD NEIGHBORS AND ENOUGH GROUND WATER BECOMES FOREST ////////////////////////////////////////////////////////////////////////////////////////
-	if(t%50==0 && readme->state==GRASS && NeighborsValue(op_plus,being_a,FOREST)==3 && NeighborsValue(op_plus,water_amount,NULL)/N>0.1)
+	if(t%50==0 && readme->state==GRASS && NeighborsValue(op_plus,being_a,FOREST)==3 && NeighborsValue(op_plus,water_amount,NULL)/8.0>0.1)
 		writeme_state(FOREST);
 }
 void Water_Simulate(Statistics* stats,int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* right,Cell* up,Cell* down,Cell* left_up,Cell* left_down,Cell* right_up,Cell* right_down,Cell ***readcells)
@@ -120,6 +120,53 @@ void Weather_Simulate(Statistics* stats,int t,int i,int j,Cell *writeme,Cell* re
 		writeme_cloud(1);
 	}
 }
+void Electricity_Simulate(Statistics* stats,int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* right,Cell* up,Cell* down,Cell* left_up,Cell* left_down,Cell* right_up,Cell* right_down,Cell ***readcells)
+{
+    float is_logic(Cell* c){return (c->state==OR || c->state==XOR || c->state==AND || c->state==NEG);}
+	writeme->value=readme->value;
+	writeme->wavefront=readme->wavefront;
+    if(t%1==0)
+    {		
+		writeme->wavefront=0;	//current on off pulses through the wire:		
+		if(readme->wavefront==0 && readme->state==OFFCURRENT && NeighborsValue2(op_or,being_a,CURRENT))
+		{ 
+			writeme->state=CURRENT;
+			writeme->wavefront=1;    //it's on the front of the wave
+		} 
+		if(readme->wavefront==0 && readme->state==CURRENT && NeighborsValue2(op_or,being_a,OFFCURRENT))
+		{ 
+			writeme->state=OFFCURRENT;
+			writeme->wavefront=1;    //it's on the front of the wave
+		} 
+		if(readme->wavefront==0 && readme->state==OFFCURRENT && (up->state==SWITCH || down->state==SWITCH || (left->state==SWITCH || (is_logic(left) && left->value)) || (right->state==SWITCH || (is_logic(right) && right->value))))
+		{
+			writeme->state=CURRENT;
+			writeme->wavefront=1;    //it's on the front of the wave
+		}
+		if(readme->wavefront==0 && readme->state==CURRENT && (up->state==OFFSWITCH || down->state==OFFSWITCH || (left->state==OFFSWITCH || (is_logic(left) && !left->value)) || (right->state==OFFSWITCH || (is_logic(right) && !right->value))))
+		{
+			writeme->state=OFFCURRENT;
+			writeme->wavefront=1;    //it's on the front of the wave
+		}
+		//rock with a wire connection is a door, and when current is here, it gets opened
+		if(readme->state==ROCK && NeighborsValue2(op_plus,being_a,CURRENT)==1)
+			writeme->state=OPENROCK;
+		//opened rock with lost wire connection gets rock again
+		if(readme->state==OPENROCK && !NeighborsValue2(op_or,being_a,CURRENT))
+			writeme->state=ROCK;
+		//////////// LOGIC ////////////////////////////////////////////////////////////////////	
+		if(readme->state==NEG && (up->state==OFFCURRENT || up->state==CURRENT))
+			writeme->value=up->state==OFFCURRENT?1:0; //eval state from input connection
+		if(readme->state==NEG && (down->state==OFFCURRENT || down->state==CURRENT))
+			writeme->value=down->state==OFFCURRENT?1:0; //eval state from input connection
+		if(readme->state==AND)
+			writeme->value=(up->state==CURRENT && down->state==CURRENT); //eval state from input connections
+		if(readme->state==OR)
+			writeme->value=(up->state==CURRENT || down->state==CURRENT); //eval state from input connections
+		if(readme->state==XOR)
+			writeme->value=(up->state==CURRENT ^ down->state==CURRENT); //eval state from inp
+    }
+}
 void Automat_Simulate(Statistics* stats,int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* right,Cell* up,Cell* down,Cell* left_up,Cell* left_down,Cell* right_up,Cell* right_down,Cell ***readcells)
 {
 	memcpy(writeme,readme,sizeof(Cell));
@@ -133,5 +180,6 @@ void Automat_Simulate(Statistics* stats,int t,int i,int j,Cell *writeme,Cell* re
 	Person_Simulate(stats,t,i,j,writeme,readme,left,right,up,down,left_up,left_down,right_up,right_down,readcells);
 	Population_Simulate(stats,t,i,j,writeme,readme,left,right,up,down,left_up,left_down,right_up,right_down,readcells);
 	Weather_Simulate(stats,t,i,j,writeme,readme,left,right,up,down,left_up,left_down,right_up,right_down,readcells);
+    Electricity_Simulate(stats,t,i,j,writeme,readme,left,right,up,down,left_up,left_down,right_up,right_down,readcells);
 }
 

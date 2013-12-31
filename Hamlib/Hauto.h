@@ -49,12 +49,13 @@ Hauto_OBJ *Hauto_OBJ_NEW(int n,void (*Exec)(void* statistics,int t,int i,int j,v
                                void* left_up,void* left_down,void* right_up,void* right_down),void* (*New_Cell)(int,int));
 void Hauto_OBJ_Exec(Hauto_OBJ *aut, void* statistics);
 float Hauto_OBJ_NeighborsValue(float (*Op)(float, float),int i,int j,void ***readCells,float (*Neighbor_Value)(void*,void*),void* data);
+float Hauto_OBJ_NeighborsValue2(float (*Op)(float, float),int i,int j,void ***readCells,float (*Neighbor_Value)(void*,void*),void* data);
 void *Hauto_OBJ_FirstNeighbor(int i,int j,void ***readCells,float (*Neighbor_Value)(void*,void*),void* data);
 #define NeighborsValue(Operation,Condition,Data) Hauto_OBJ_NeighborsValue(Operation,i,j,readcells,Condition,Data)
+#define NeighborsValue2(Operation,Condition,Data) Hauto_OBJ_NeighborsValue2(Operation,i,j,readcells,Condition,Data)
 #define FirstNeighbor(Condition,Data) Hauto_OBJ_FirstNeighbor(i,j,readcells,Condition,Data)
 #define SetCell(i,j,Type,property,value) do{((Type*)automat->readCells[i][j])->property=value;((Type*)automat->writeCells[i][j])->property=value;}while(0)
 #define GetCell(i,j,Type,property) ((Type*)automat->readCells[i][j])->property
-#define N 8
 //::::::::::::::::::::::::::::::::::::::::::://
 #endif
 /*................COMMENTS...................//

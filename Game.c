@@ -46,6 +46,19 @@ void Game_Init()
 	hfio_LoadTex("textures/house_men.tga",&HOUSE_MEN);
 	hfio_LoadTex("textures/grass_men.tga",&GRASS_MEN);
 	hfio_LoadTex("textures/forest_men.tga",&FOREST_MEN);
+    hfio_LoadTex("textures/and.tga",&AND);
+    hfio_LoadTex("textures/neg.tga",&NEG);
+    hfio_LoadTex("textures/xor.tga",&XOR);
+    hfio_LoadTex("textures/or.tga",&OR);
+    hfio_LoadTex("textures/openrock.tga",&OPENROCK);
+    hfio_LoadTex("textures/offswitch.tga",&OFFSWITCH);
+    hfio_LoadTex("textures/switch.tga",&SWITCH);
+    hfio_LoadTex("textures/offcurrent.tga",&OFFCURRENT);
+    hfio_LoadTex("textures/current.tga",&CURRENT);
+    hfio_LoadTex("textures/rock.tga",&ROCK);
+    hfio_LoadTex("textures/water.tga",&WATER);
+    hfio_LoadTex("textures/agent.tga",&AGENT);
+    hfio_LoadTex("textures/grass.tga",&GRASS);
 	WATER=102;GRASS=101;
 	////////////////////////// OTHER INIT STUFF ///////////////////////////////////////////////////////////////
 	srand(WORLD);

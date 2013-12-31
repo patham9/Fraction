@@ -45,6 +45,11 @@ float Hauto_OBJ_NeighborsValue(float (*Op)(float, float),int i,int j,void ***rea
 	Neighbor_Value(readCells[i-1][j-1],data)),Neighbor_Value(readCells[i][j+1],data)),Neighbor_Value(readCells[i][j-1],data)),
 	Neighbor_Value(readCells[i-1][j+1],data)),Neighbor_Value(readCells[i+1][j-1],data));
 }
+float Hauto_OBJ_NeighborsValue2(float (*Op)(float, float),int i,int j,void ***readCells,float (*Neighbor_Value)(void*,void*),void* data)
+{
+	return Op(Op(Op(Neighbor_Value(readCells[i+1][j],data),Neighbor_Value(readCells[i-1][j],data)),
+    Neighbor_Value(readCells[i][j+1],data)),Neighbor_Value(readCells[i][j-1],data));
+}
 void *Hauto_OBJ_FirstNeighbor(int i,int j,void ***readCells,float (*Neighbor_Value)(void*,void*),void* data)
 {
 	int k,l;
