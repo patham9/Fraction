@@ -4,7 +4,7 @@
 #include "Hamlib/Hutil.h"
 #include "Hamlib/Hauto.h"
 
-#define WORLD 		  4
+#define WORLD 		  1
 #define worldsize  	  256
 #define ALLOW_SHADERS   1
 #define MAX_HOUSES    200

@@ -90,17 +90,17 @@ float random(float x,float y) 									//simple random generator
 {
     return fract((cos(dot(vec2(x,y),vec2(12.9898,78.233)))*43758.5453));
 }
-vec4 sobel_normal(float texelSize) 										//geglätteter normalvektor welcher die position des texels im vertex berücksichtigt
+vec4 sobel_normal(float texelSize,float sz) 										//geglätteter normalvektor welcher die position des texels im vertex berücksichtigt
 {
 	float normal_factor=4;
-    float tl=abs(texture2D(tex,cord+texelSize*vec2(-1,-1)).r); 			//top left
-    float  l=abs(texture2D(tex,cord+texelSize*vec2(-1, 0)).r); 			//left
-    float bl=abs(texture2D(tex,cord+texelSize*vec2(-1, 1)).r); 			//bottom left
-    float  t=abs(texture2D(tex,cord+texelSize*vec2( 0,-1)).r); 			//top
-    float  b=abs(texture2D(tex,cord+texelSize*vec2( 0, 1)).r); 			//bottom
-    float tr=abs(texture2D(tex,cord+texelSize*vec2( 1,-1)).r); 			//top right
-    float  r=abs(texture2D(tex,cord+texelSize*vec2( 1, 0)).r); 			//right
-    float br=abs(texture2D(tex,cord+texelSize*vec2( 1, 1)).r); 			//bottom right
+    float tl=abs(texture2D(tex,cord+texelSize*vec2(-sz,-sz)).r); 			//top left
+    float  l=abs(texture2D(tex,cord+texelSize*vec2(-sz, 0)).r); 			//left
+    float bl=abs(texture2D(tex,cord+texelSize*vec2(-sz, 10)).r); 			//bottom left
+    float  t=abs(texture2D(tex,cord+texelSize*vec2( 0,-sz)).r); 			//top
+    float  b=abs(texture2D(tex,cord+texelSize*vec2( 0, sz)).r); 			//bottom
+    float tr=abs(texture2D(tex,cord+texelSize*vec2( sz,-sz)).r); 			//top right
+    float  r=abs(texture2D(tex,cord+texelSize*vec2( sz, 0)).r); 			//right
+    float br=abs(texture2D(tex,cord+texelSize*vec2( sz, sz)).r); 			//bottom right
     float dX=tr+2*r+br-tl-2*l-bl;
     float dY=bl+2*b+br-tl-2*t-tr;
     vec4 N=vec4(normalize(vec3(dX,1.0f/normal_factor,dY)),1.0);
@@ -131,8 +131,15 @@ void main()
 	vec4 light_position 	 = vec4(20,20,20,1);
 	////////////////////////////////////////////////////////////////////
 	vec4 s=-normalize(camera_position-light_position);					//light
-	vec3 n=sobel_normal(texelSize);
-	vec3 r=normalize(-reflect(s.xyz,n));
+    vec3 n=2*sobel_normal(texelSize,10);
+    vec3 n2=2*sobel_normal(texelSize,1);
+    vec3 n3=2*sobel_normal(texelSize,20);
+    n=clamp(n,0,0.8);
+    n2=clamp(n,0,0.8);
+    n3=clamp(n,0,0.8);
+    
+	//vec3 r=0.5*(normalize(-reflect(s.xyz,n))+normalize(-reflect(s.xyz,n2)));
+    vec3 r=0.33*(normalize(-reflect(s.xyz,n))+normalize(-reflect(s.xyz,n2))+normalize(-reflect(s.xyz,n3)));
 	vec3 v=normalize(-light_position.xyz);
 	vec4 diffuse_color=vec4(material_diffuse.xyz*max(0.0,dot(n,s.xyz)),1)*light_diffuse*texcolor*texcolor;
 	vec4 specular=light_specular*material_specular*pow(max(0.0,dot(r,v)),material_shininess);

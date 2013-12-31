@@ -52,7 +52,13 @@ void draw()
 			}
 			else
 			{
-				toGPU[k]=(c->cloud && !ALLOW_SHADERS)*0.2+0.5; k++;	//use texture for rendering instead in mode 0
+                #ifdef ALLOW_SHADERS
+                toGPU[k]=(c->cloud && !ALLOW_SHADERS)*0.2+0.4+((Cell*)automat->readCells[i][j])->height/15.0;
+                #endif
+                #ifndef ALLOW_SHADERS
+				toGPU[k]=(c->cloud && !ALLOW_SHADERS)*0.2+0.5; 
+                #endif
+                k++;	//use texture for rendering instead in mode 0
 				toGPU[k]=(c->cloud && !ALLOW_SHADERS)*0.2+0.7; k++;
 				toGPU[k]=(c->cloud && !ALLOW_SHADERS)*0.2+1;   k++;
 			}
