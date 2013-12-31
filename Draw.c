@@ -105,14 +105,14 @@ void draw()
 					else
 					if(c->person)
 					{
-						if(c->state==GRASS)
-							hrend_DrawObj(i,j,0,0.5,1,GRASS_MEN);
 						if(c->state==HOUSE)
 							hrend_DrawObj(i,j,0,0.5,1,HOUSE_MEN);
 						if(c->state==FOREST)
 							hrend_DrawObj(i,j,0,0.5,1,FOREST_MEN);
 						if(c->state==STREET)
 							hrend_DrawObj(i,j,0,0.5,1,STREET_MEN);
+                        else
+                            hrend_DrawObj(i,j,0,0.5,1,GRASS_MEN);
 					}
 					else
 					{
