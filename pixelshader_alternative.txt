@@ -1,0 +1,186 @@
+varying vec2 cord;
+uniform sampler2D tex;
+uniform int worldsize;
+uniform int t;
+//https://github.com/ashima/webgl-noise/blob/master/src/noise3D.glsl
+// Description : Array and textureless GLSL 2D/3D/4D simplex
+// noise functions.
+// Author : Ian McEwan, Ashima Arts.
+// Maintainer : ijm
+// Lastmod : 20110822 (ijm)
+// License : Copyright (C) 2011 Ashima Arts. All rights reserved.
+// Distributed under the MIT License. See LICENSE file.
+// https://github.com/ashima/webgl-noise
+//
+vec3 mod289(vec3 x) {
+  return x - floor(x * (1.0 / 289.0)) * 289.0;
+}
+vec4 mod289(vec4 x) {
+  return x - floor(x * (1.0 / 289.0)) * 289.0;
+}
+vec4 permute(vec4 x) {
+     return mod289(((x*34.0)+1.0)*x);
+}
+vec4 taylorInvSqrt(vec4 r)
+{
+  return 1.79284291400159 - 0.85373472095314 * r;
+}
+float snoise(vec3 v)
+{
+  const vec2 C = vec2(1.0/6.0, 1.0/3.0) ;
+  const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
+// First corner
+  vec3 i = floor(v + dot(v, C.yyy) );
+  vec3 x0 = v - i + dot(i, C.xxx) ;
+// Other corners
+  vec3 g = step(x0.yzx, x0.xyz);
+  vec3 l = 1.0 - g;
+  vec3 i1 = min( g.xyz, l.zxy );
+  vec3 i2 = max( g.xyz, l.zxy );
+  // x0 = x0 - 0.0 + 0.0 * C.xxx;
+  // x1 = x0 - i1 + 1.0 * C.xxx;
+  // x2 = x0 - i2 + 2.0 * C.xxx;
+  // x3 = x0 - 1.0 + 3.0 * C.xxx;
+  vec3 x1 = x0 - i1 + C.xxx;
+  vec3 x2 = x0 - i2 + C.yyy; // 2.0*C.x = 1/3 = C.y
+  vec3 x3 = x0 - D.yyy; // -1.0+3.0*C.x = -0.5 = -D.y
+// Permutations
+  i = mod289(i);
+  vec4 p = permute( permute( permute(
+             i.z + vec4(0.0, i1.z, i2.z, 1.0 ))
+           + i.y + vec4(0.0, i1.y, i2.y, 1.0 ))
+           + i.x + vec4(0.0, i1.x, i2.x, 1.0 ));
+// Gradients: 7x7 points over a square, mapped onto an octahedron.
+// The ring size 17*17 = 289 is close to a multiple of 49 (49*6 = 294)
+  float n_ = 0.142857142857; // 1.0/7.0
+  vec3 ns = n_ * D.wyz - D.xzx;
+  vec4 j = p - 49.0 * floor(p * ns.z * ns.z); // mod(p,7*7)
+  vec4 x_ = floor(j * ns.z);
+  vec4 y_ = floor(j - 7.0 * x_ ); // mod(j,N)
+  vec4 x = x_ *ns.x + ns.yyyy;
+  vec4 y = y_ *ns.x + ns.yyyy;
+  vec4 h = 1.0 - abs(x) - abs(y);
+  vec4 b0 = vec4( x.xy, y.xy );
+  vec4 b1 = vec4( x.zw, y.zw );
+  //vec4 s0 = vec4(lessThan(b0,0.0))*2.0 - 1.0;
+  //vec4 s1 = vec4(lessThan(b1,0.0))*2.0 - 1.0;
+  vec4 s0 = floor(b0)*2.0 + 1.0;
+  vec4 s1 = floor(b1)*2.0 + 1.0;
+  vec4 sh = -step(h, vec4(0.0));
+  vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy ;
+  vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww ;
+  vec3 p0 = vec3(a0.xy,h.x);
+  vec3 p1 = vec3(a0.zw,h.y);
+  vec3 p2 = vec3(a1.xy,h.z);
+  vec3 p3 = vec3(a1.zw,h.w);
+//Normalise gradients
+  vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));
+  p0 *= norm.x;
+  p1 *= norm.y;
+  p2 *= norm.z;
+  p3 *= norm.w;
+// Mix final noise value
+  vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
+  m = m * m;
+  return 42.0 * dot( m*m, vec4( dot(p0,x0), dot(p1,x1),
+                                dot(p2,x2), dot(p3,x3) ) );
+}
+//////////////////////////////////////////
+float random(float x,float y) 									//simple random generator
+{
+    return fract((cos(dot(vec2(x,y),vec2(12.9898,78.233)))*43758.5453));
+}
+vec4 sobel_normal(float texelSize) 										//geglätteter normalvektor welcher die position des texels im vertex berücksichtigt
+{
+	float normal_factor=4;
+    float tl=abs(texture2D(tex,cord+texelSize*vec2(-1,-1)).r); 			//top left
+    float  l=abs(texture2D(tex,cord+texelSize*vec2(-1, 0)).r); 			//left
+    float bl=abs(texture2D(tex,cord+texelSize*vec2(-1, 1)).r); 			//bottom left
+    float  t=abs(texture2D(tex,cord+texelSize*vec2( 0,-1)).r); 			//top
+    float  b=abs(texture2D(tex,cord+texelSize*vec2( 0, 1)).r); 			//bottom
+    float tr=abs(texture2D(tex,cord+texelSize*vec2( 1,-1)).r); 			//top right
+    float  r=abs(texture2D(tex,cord+texelSize*vec2( 1, 0)).r); 			//right
+    float br=abs(texture2D(tex,cord+texelSize*vec2( 1, 1)).r); 			//bottom right
+    float dX=tr+2*r+br-tl-2*l-bl;
+    float dY=bl+2*b+br-tl-2*t-tr;
+    vec4 N=vec4(normalize(vec3(dX,1.0f/normal_factor,dY)),1.0);
+    return N*0.5f+0.5f;
+}
+void main()
+{
+	float texelSize=1/(float)worldsize;
+	vec4 texcolor=texture2D(tex, cord);
+	float type=texcolor.a;
+	float snd2=snoise(vec3(cord.x*worldsize*5,cord.y*worldsize*5,0.1*t));
+	if(type>0.66)//water
+	{
+		float waves2=0.06*sin(cord.x*1000/3+0.1*t)*cos(cord.y*1000/3+0.1*t)+0.02*sin(cord.x*1000*2-0.13*t*2)*cos(cord.y*1000*2-0.1*t*2)+vec4(0,0,0.1,0);
+		gl_FragColor=gl_Color*texcolor;
+		gl_FragColor+=snd2*0.05+abs(snd2)*0.05+waves2*0.5*random(cord.x*worldsize,cord.y*worldsize)*2;
+		gl_FragColor.b+=0.1;
+		return;
+	}
+	texcolor=vec4(texcolor.rgb,1);	
+	////////////////// PARAMETERS //////////////////////////////////////					
+    vec4 camera_position     = vec4(0,10,0,1);								
+    vec4 material_diffuse    = vec4(0.8,1,0.6,1);
+	vec4 material_specular   = vec4(0,0,0,1);
+	float material_shininess = 0.1;
+	vec4 light_specular      = vec4(0.0,0.0,0.0,1); 					
+	vec4 light_diffuse       = vec4(0.7,0.7,0.7,1);
+	vec4 light_position 	 = vec4(20,20,20,1);
+	////////////////////////////////////////////////////////////////////
+	vec4 s=-normalize(camera_position-light_position);					//light
+	vec3 n=sobel_normal(texelSize);
+	vec3 r=normalize(-reflect(s.xyz,n));
+	vec3 v=normalize(-light_position.xyz);
+	vec4 diffuse_color=vec4(material_diffuse.xyz*max(0.0,dot(n,s.xyz)),1)*light_diffuse*texcolor*texcolor;
+	vec4 specular=light_specular*material_specular*pow(max(0.0,dot(r,v)),material_shininess);
+	float rnd=random(cord.x*1000.0,cord.y*1000.0);
+	gl_FragColor=diffuse_color+specular+0.07*vec4(rnd,rnd,rnd,1);
+	if(type<0.66 && type>0.33)//cloud
+	{
+		gl_FragColor+=vec4(0.05,0.05,0.05,0);
+	}
+	float hr=abs(texcolor.r-texture2D(tex, cord+vec2(0.01,0.01)).r);
+	float hl=abs(texcolor.r-texture2D(tex, cord+vec2(-0.01,0.01)).r);
+	float hu=abs(texcolor.r-texture2D(tex, cord+vec2(0.01,-0.01)).r);
+	float hd=abs(texcolor.r-texture2D(tex, cord+vec2(-0.01,-0.01)).r);
+	float steig=max(hr,hl);
+	steig=max(steig,hu);
+	steig=max(steig,hd);
+	float middle=(gl_FragColor.g+gl_FragColor.r+gl_FragColor.b)/3.0;
+	float sn=snoise(vec3(cord.x*worldsize,cord.y*worldsize,steig));
+	float sn2=snoise(vec3(cord.x*worldsize*20,cord.y*worldsize*20,steig));
+	float sn3=snoise(vec3(cord.x*worldsize/10,cord.y*worldsize/10,steig));
+	float sn4=snoise(vec3(cord.x*worldsize/30,cord.y*worldsize/30,steig));
+	if(steig>0.028 && sn2>0.5) //minifelsen
+	{
+		gl_FragColor.g-=0.2; 
+		gl_FragColor.r+=sn2*0.1;
+		gl_FragColor.b+=sn2*0.5;
+	}
+	if(steig>0.018 && texcolor.r>0.8) //schnee
+	{
+		gl_FragColor.g=0.5+gl_FragColor.r; 
+		gl_FragColor.r=0.5+gl_FragColor.r;
+		gl_FragColor.b=0.5+gl_FragColor.r;
+	}
+	else
+	if(texcolor.r>0.73) //almgras
+	{
+		gl_FragColor.g=0.4+gl_FragColor.r; 
+		gl_FragColor.r=0.1+gl_FragColor.r;
+		gl_FragColor.b-=0.15+gl_FragColor.r;
+	}
+	else
+	if(sn4>0.5 && sn3>0.5 && sn>0.5) //felse
+	{
+		gl_FragColor.g-=0.35+sn*0.1;
+		gl_FragColor.r=gl_FragColor.g;
+		gl_FragColor.b=gl_FragColor.g;
+	}
+	gl_FragColor.g-=0.1;
+	gl_FragColor.b-=0.3;
+	gl_FragColor.r-=0.1;
+}	
