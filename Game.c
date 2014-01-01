@@ -34,7 +34,6 @@ void Game_Init()
 	////////////////////////// MAKE EVENT HANDLERS KNOWN TO HAMLIB //////////////////////////////////////////////
 	hnav_SetRendFunc(draw);
 	hrend_2Dmode(0.5,0.6,0.5);
-	gui_Init();
 	////////////////////////// LOAD TEXTURES ///////////////////////////////////////////////////////////////
 	hfio_LoadTex("textures/command.tga",&COMMAND);
 	hfio_LoadTex("textures/forest.tga",&FOREST);
@@ -59,8 +58,8 @@ void Game_Init()
     hfio_LoadTex("textures/water.tga",&WATER);
     hfio_LoadTex("textures/agent.tga",&AGENT);
     hfio_LoadTex("textures/grass.tga",&GRASS);
-	WATER=102;GRASS=101;
 	////////////////////////// OTHER INIT STUFF ///////////////////////////////////////////////////////////////
+    gui_Init(); //since now buttons are involved GUI needs to be inited after texture loading
 	srand(WORLD);
 	landscape=Generate_PerlinNoise(worldsize,worldsize,Generate_WhiteNoise(worldsize,worldsize),8,0);
 	automat=Hauto_OBJ_NEW(worldsize,Automat_Simulate,Cell_NEW);

@@ -14,6 +14,21 @@ void gui_mouse_down(int player,EventArgs *e)
 	{
 		if(mouse_operation[player]==none)
 		{
+            #ifdef DIRECT_PLACEMENT
+            //terraforming support in this mode cause its cool :)
+            if(type[player]==TERRAFORM_DOWN)
+            {
+                SetCell(i,j,Cell,height,GetCell(i,j,Cell,height)+0.1);
+                Draw_Set_HeightmapChanged();
+                return;
+            }
+            if(type[player]==TERRAFORM_UP)
+            {
+                SetCell(i,j,Cell,height,GetCell(i,j,Cell,height)-0.1);
+                Draw_Set_HeightmapChanged();
+                return;
+            }
+            #endif
 			#ifndef DIRECT_PLACEMENT
 			if(type[player]==BASE && !hasbase[player])
             #endif
@@ -126,40 +141,46 @@ void gui_button(int player,int i)
 		}
 	}
 }
+void gui_buttons_draw()
+{
+    hrend_SelectColor(1,1,1,1);
+    //hrend_DrawObj(0.1,0,0,0.03,1,COMMAND);
+    hgui_RENDER();
+}
 void gui_Init()
 {
 	int client=0,i;
 	hinput_AddMouseDown(client_send_mouse_down);
 	hinput_AddMouseDragged(client_send_mouse_down);
 	hinput_AddKeyUp(client_send_key_up);
-	hgui_AddSimpleElem(0.0,0,0.09,0.04,"EXIT",exit,0);
-	hgui_AddSimpleElem(0.1,0,0.09,0.04,"WATER",client_send_button,'W');
-	hgui_AddSimpleElem(0.2,0,0.09,0.04,"FOREST",client_send_button,'F');
-	hgui_AddSimpleElem(0.3,0,0.09,0.04,"STREET",client_send_button,'S');
-	hgui_AddSimpleElem(0.4,0,0.09,0.04,"GRASS",client_send_button,'G');
-	hgui_AddSimpleElem(0.5,0,0.09,0.04,"ROCK",client_send_button,'R');
-	hgui_AddSimpleElem(0.6,0,0.09,0.04,"HOUSE",client_send_button,'H');
-	hgui_AddSimpleElem(0.7,0,0.09,0.04,"DEBUG",client_send_button,'D');
-	hgui_AddSimpleElem(0.8,0,0.09,0.04,"BASE",client_send_button,'B');
+	hgui_AddSimpleElem(0.0,0,0.09,0.04,"EXIT",exit,0,NULL);
+	hgui_AddSimpleElem(0.1,0,0.09,0.04,"WATER",client_send_button,'W',WATER);
+	hgui_AddSimpleElem(0.2,0,0.09,0.04,"FOREST",client_send_button,'F',FOREST);
+	hgui_AddSimpleElem(0.3,0,0.09,0.04,"STREET",client_send_button,'S',STREET);
+	hgui_AddSimpleElem(0.4,0,0.09,0.04,"GRASS",client_send_button,'G',GRASS);
+	hgui_AddSimpleElem(0.5,0,0.09,0.04,"ROCK",client_send_button,'R',ROCK);
+	hgui_AddSimpleElem(0.6,0,0.09,0.04,"HOUSE",client_send_button,'H',HOUSE);
+	hgui_AddSimpleElem(0.7,0,0.09,0.04,"DEBUG",client_send_button,'D',NULL);
+	hgui_AddSimpleElem(0.8,0,0.09,0.04,"BASE",client_send_button,'B',HOUSE);
     
-	hgui_AddSimpleElem(0.0,0.96,0.09,0.04,"LEFTUP",client_send_button,leftup);
-	hgui_AddSimpleElem(0.1,0.96,0.09,0.04,"RIDOWN",client_send_button,rightdown);
-	hgui_AddSimpleElem(0.2,0.96,0.09,0.04,"COPY",client_send_button,copy);
-	hgui_AddSimpleElem(0.3,0.96,0.09,0.04,"PASTE",client_send_button,paste);
-	hgui_AddSimpleElem(0.4,0.96,0.18,0.04,"TERRAFORM UP",client_send_button,'U');
-	hgui_AddSimpleElem(0.59,0.96,0.18,0.04,"TERRAFORM DOWN",client_send_button,'D');
+	hgui_AddSimpleElem(0.0,0.96,0.09,0.04,"LEFTUP",client_send_button,leftup,NULL);
+	hgui_AddSimpleElem(0.1,0.96,0.09,0.04,"RIDOWN",client_send_button,rightdown,NULL);
+	hgui_AddSimpleElem(0.2,0.96,0.09,0.04,"COPY",client_send_button,copy,NULL);
+	hgui_AddSimpleElem(0.3,0.96,0.09,0.04,"PASTE",client_send_button,paste,NULL);
+	hgui_AddSimpleElem(0.4,0.96,0.18,0.04,"TERRA UP",client_send_button,'U',NULL);
+	hgui_AddSimpleElem(0.59,0.96,0.18,0.04,"TERRA DOWN",client_send_button,'D',NULL);
+    hgui_AddSimpleElem(0.78,0.96,0.09,0.04,"XOR",client_send_button,'X',XOR);
+	hgui_AddSimpleElem(0.88,0.96,0.09,0.04,"OR",client_send_button,'O',OR);
     
-    hgui_AddSimpleElem(0.0,0.91,0.09,0.04,"AGENT",client_send_button,'V');
-	hgui_AddSimpleElem(0.1,0.91,0.09,0.04,"CURRENT",client_send_button,'C');
-	hgui_AddSimpleElem(0.2,0.91,0.09,0.04,"OFFCURRENT",client_send_button,'I');
-	hgui_AddSimpleElem(0.3,0.91,0.09,0.04,"SWITCH",client_send_button,'E');
-	hgui_AddSimpleElem(0.4,0.91,0.18,0.04,"OFFSWITCH",client_send_button,'Q');
-	hgui_AddSimpleElem(0.59,0.91,0.18,0.04,"OPENROCK",client_send_button,'M');
-    
-    hgui_AddSimpleElem(0.0,0.86,0.09,0.04,"NEG",client_send_button,'N');
-	hgui_AddSimpleElem(0.1,0.86,0.09,0.04,"AND",client_send_button,'A');
-	hgui_AddSimpleElem(0.2,0.86,0.09,0.04,"XOR",client_send_button,'X');
-	hgui_AddSimpleElem(0.3,0.86,0.09,0.04,"OR",client_send_button,'O');
+    hgui_AddSimpleElem(0.0,0.91,0.09,0.04,"AGENT",client_send_button,'V',AGENT);
+	hgui_AddSimpleElem(0.1,0.91,0.09,0.04,"WIRE1",client_send_button,'C',CURRENT);
+	hgui_AddSimpleElem(0.2,0.91,0.09,0.04,"WIREO",client_send_button,'I',OFFCURRENT);
+	hgui_AddSimpleElem(0.3,0.91,0.09,0.04,"ON",client_send_button,'E',SWITCH);
+	hgui_AddSimpleElem(0.4,0.91,0.18,0.04,"OFF",client_send_button,'Q',OFFSWITCH);
+    hgui_AddSimpleElem(0.78,0.91,0.09,0.04,"NEG",client_send_button,'N',NEG);
+	hgui_AddSimpleElem(0.88,0.91,0.09,0.04,"AND",client_send_button,'A',AND);
+    hrend_SetGUIRenderRoutine(gui_buttons_draw);
+
     if(!SINGLEPLAYER)
     {
         printf("enter desired player id integer:");

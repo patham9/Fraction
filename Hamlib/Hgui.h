@@ -66,7 +66,7 @@ void hgui_UPDATE();
 void hgui_CHECK();
 void hgui_RENDER();
 //::
-unsigned int hgui_AddElem(float px,float py,float width,float height,char * text,float textsize,float textdist,float textoffsetX,Event OnClick,unsigned char visible,int INFO);
+unsigned int hgui_AddElem(float px,float py,float width,float height,char * text,float textsize,float textdist,float textoffsetX,Event OnClick,unsigned char visible,int INFO,unsigned int icon);
 //TODO: SIMPEL MACHEN
 void hgui_SetActiveGUI(int gui);
 int hgui_GetLastClickedElem(); //Polling
@@ -81,7 +81,7 @@ void hgui_SetElemColor(unsigned int button,float r,float g,float b,float a);
 char *hgui_GetElemText(unsigned int button);
 struct float4 hgui_GetElemColor(unsigned int button);
 int hgui_GetElemInfo(unsigned int button);
-unsigned int hgui_AddSimpleElem(float px,float py,float width,float height,char *text,Event OnClick,int INFO);
+unsigned int hgui_AddSimpleElem(float px,float py,float width,float height,char *text,Event OnClick,int INFO,unsigned int icon);
 void hgui_setCallBack(void (*CallBackGUIFunc)());
 //::::::::::::::::::::::::::::::::::::::::::://
 #endif

@@ -114,9 +114,8 @@ void main()
 	if(type>0.66)//water
 	{
 		float snd2=snoise(vec3(cord.x*worldsize*5,cord.y*worldsize*5,0.1*t));
-		float waves2=0.06*sin(cord.x*1000/3+0.1*t)*cos(cord.y*1000/3+0.1*t)+0.02*sin(cord.x*1000*2-0.13*t*2)*cos(cord.y*1000*2-0.1*t*2)+vec4(0,0,0.1,0);
 		gl_FragColor=gl_Color*texcolor;
-		gl_FragColor+=snd2*0.05+abs(snd2)*0.05+waves2*0.5*random(cord.x*worldsize,cord.y*worldsize)*2;
+		gl_FragColor+=snd2*0.05+abs(snd2)*0.05;
 		gl_FragColor.b+=0.1;
 		return;
 	}
@@ -131,15 +130,16 @@ void main()
 	vec4 light_position 	 = vec4(20,20,20,1);
 	////////////////////////////////////////////////////////////////////
 	vec4 s=-normalize(camera_position-light_position);					//light
-    vec3 n=2*sobel_normal(texelSize,10);
-    vec3 n2=2*sobel_normal(texelSize,1);
-    vec3 n3=2*sobel_normal(texelSize,20);
-    n=clamp(n,0,0.8);
-    n2=clamp(n,0,0.8);
-    n3=clamp(n,0,0.8);
-    
-	//vec3 r=0.5*(normalize(-reflect(s.xyz,n))+normalize(-reflect(s.xyz,n2)));
-    vec3 r=0.33*(normalize(-reflect(s.xyz,n))+normalize(-reflect(s.xyz,n2))+normalize(-reflect(s.xyz,n3)));
+    vec3 n=sobel_normal(texelSize,1);
+    float am=10;
+    for(int i=2;i<am;i++)
+    {
+        n+=sobel_normal(texelSize,i); //*2
+    } 
+    n=n/am;
+    //n=2*n;
+   // n=clamp(n,0,0.8);
+	vec3 r=normalize(-reflect(s.xyz,n));
 	vec3 v=normalize(-light_position.xyz);
 	vec4 diffuse_color=vec4(material_diffuse.xyz*max(0.0,dot(n,s.xyz)),1)*light_diffuse*texcolor*texcolor;
 	vec4 specular=light_specular*material_specular*pow(max(0.0,dot(r,v)),material_shininess);

@@ -20,6 +20,7 @@ struct Button
 	Event OnReleased;
 	float textoffsetX;
 	int INFO; //OBJECT
+    unsigned int icon;
 };
 
 #define maxbuttons 255
@@ -34,7 +35,7 @@ struct GUI
 
 int activeGUI=0;	//SELECT GUI INSTANCE
 
-unsigned int hgui_AddElem(float px,float py,float width,float height,char *text,float textsize,float textdist,float textoffsetX,Event OnClick,unsigned char visible,int INFO)
+unsigned int hgui_AddElem(float px,float py,float width,float height,char *text,float textsize,float textdist,float textoffsetX,Event OnClick,unsigned char visible,int INFO, unsigned int icon)
 {
 	gui[activeGUI].buttons[gui[activeGUI].nButtons].x=px;
 	gui[activeGUI].buttons[gui[activeGUI].nButtons].y=py;
@@ -51,11 +52,12 @@ unsigned int hgui_AddElem(float px,float py,float width,float height,char *text,
 	gui[activeGUI].buttons[gui[activeGUI].nButtons].red=-1;
 	gui[activeGUI].buttons[gui[activeGUI].nButtons].blue=-1;
 	gui[activeGUI].buttons[gui[activeGUI].nButtons].green=-1;
+    gui[activeGUI].buttons[gui[activeGUI].nButtons].icon=icon;
 	return gui[activeGUI].nButtons++;
 }
-unsigned int hgui_AddSimpleElem(float px,float py,float width,float height,char *text,Event OnClick,int INFO)
+unsigned int hgui_AddSimpleElem(float px,float py,float width,float height,char *text,Event OnClick,int INFO,unsigned int icon)
 {
-	return hgui_AddElem(px,py,width,height,text,2.0f,0.015f,0.01f,OnClick,1,INFO);
+	return hgui_AddElem(px,py,width,height,text,2.0f,0.015f,0.01f,OnClick,1,INFO,icon);
 }
 void hgui_SetElemColor(unsigned int button,float r,float g,float b,float a)
 {
@@ -243,9 +245,11 @@ int i=0;
 			glScalef(gui[activeGUI].buttons[i].width/2,gui[activeGUI].buttons[i].height/2,0);
 			glCallList(ControlDL);
 			glPopMatrix();
+            if(gui[activeGUI].buttons[i].icon!=NULL)
+                hrend_DrawObj(gui[activeGUI].buttons[i].x+0.01,gui[activeGUI].buttons[i].y+0.02,0,0.01,1,gui[activeGUI].buttons[i].icon);
 			glDisable(GL_TEXTURE_2D);
-			hrend_DrawSegmentString(gui[activeGUI].buttons[i].text,
-			gui[activeGUI].buttons[i].x+gui[activeGUI].buttons[i].textoffsetX,gui[activeGUI].buttons[i].y+gui[activeGUI].buttons[i].height/2.0f-0.005f,
+            hrend_DrawSegmentString(gui[activeGUI].buttons[i].text,
+			gui[activeGUI].buttons[i].x+gui[activeGUI].buttons[i].textoffsetX+0.01,gui[activeGUI].buttons[i].y+gui[activeGUI].buttons[i].height/2.0f-0.005f,
 			gui[activeGUI].buttons[i].textsize,gui[activeGUI].buttons[i].textdist);
 			glEnable(GL_TEXTURE_2D);
 		}
