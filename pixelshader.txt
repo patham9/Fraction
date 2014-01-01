@@ -111,13 +111,15 @@ void main()
 	float texelSize=1/(float)worldsize;
 	vec4 texcolor=texture2D(tex, cord);
 	float type=texcolor.a;
+    int schnee=1;
 	if(type>0.66)//water
 	{
 		float snd2=snoise(vec3(cord.x*worldsize*5,cord.y*worldsize*5,0.1*t));
+		float waves2=0.06*sin(cord.x*1000/3+0.1*t)*cos(cord.y*1000/3+0.1*t)+0.02*sin(cord.x*1000*2-0.13*t*2)*cos(cord.y*1000*2-0.1*t*2)+vec4(0,0,0.1,0);
 		gl_FragColor=gl_Color*texcolor;
-		gl_FragColor+=snd2*0.05+abs(snd2)*0.05;
+		gl_FragColor+=snd2*0.05+abs(snd2)*0.05+waves2*0.5*random(cord.x*worldsize,cord.y*worldsize)*2;
 		gl_FragColor.b+=0.1;
-		return;
+		schnee=0;
 	}
 	texcolor=vec4(texcolor.rgb,1);	
 	////////////////// PARAMETERS //////////////////////////////////////					
@@ -131,22 +133,31 @@ void main()
 	////////////////////////////////////////////////////////////////////
 	vec4 s=-normalize(camera_position-light_position);					//light
     vec3 n=sobel_normal(texelSize,1);
-    float am=10;
+    float am=20;
     for(int i=2;i<am;i++)
     {
         n+=sobel_normal(texelSize,i); //*2
     } 
     n=n/am;
+    n.z-=1;
     //n=2*n;
-   // n=clamp(n,0,0.8);
 	vec3 r=normalize(-reflect(s.xyz,n));
 	vec3 v=normalize(-light_position.xyz);
 	vec4 diffuse_color=vec4(material_diffuse.xyz*max(0.0,dot(n,s.xyz)),1)*light_diffuse*texcolor*texcolor;
 	vec4 specular=light_specular*material_specular*pow(max(0.0,dot(r,v)),material_shininess);
-	float rnd=random(cord.x*1000.0,cord.y*1000.0);
-	gl_FragColor=diffuse_color+specular+0.07*vec4(rnd,rnd,rnd,1);
+    if(schnee==0)
+    {
+        gl_FragColor=gl_FragColor*diffuse_color; 
+    }
+    else
+    {
+        float rnd=random(cord.x*1000.0,cord.y*1000.0);
+        gl_FragColor=diffuse_color+specular+0.07*vec4(rnd,rnd,rnd,1);
+    }
 	if(type<0.66 && type>0.33)//cloud
 	{
 		gl_FragColor+=vec4(0.05,0.05,0.05,0);
 	}
+    gl_FragColor+=vec4(0.05,0.05,0.05,0);
+    gl_FragColor*=1.5;
 }	
