@@ -158,6 +158,17 @@ void main()
 	{
 		gl_FragColor+=vec4(0.05,0.05,0.05,0);
 	}
+    float hr=abs(texcolor.r-texture2D(tex, cord+vec2(0.01,0.01)).r);
+	float hl=abs(texcolor.r-texture2D(tex, cord+vec2(-0.01,0.01)).r);
+	float steig=max(hr,hl);
+    if(steig>0.018 && texcolor.r>0.8 && type<0.66) //schnee
+	{
+        float snd3=snoise(vec3(cord.x*worldsize*5,cord.y*worldsize*5,0));
+		gl_FragColor.g=gl_FragColor.r; 
+		gl_FragColor.b=gl_FragColor.r;
+        gl_FragColor.rbg-=0.1*snd3;
+        gl_FragColor.rbg+=vec4(0.3,0.3,0.3,0);
+	}
     gl_FragColor+=vec4(0.05,0.05,0.05,0);
     gl_FragColor*=1.5;
 }	
