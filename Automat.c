@@ -100,7 +100,7 @@ void Weather_Simulate(Statistics* stats,int t,int i,int j,Cell *writeme,Cell* re
 			writeme_cloud(1);
 		else
 	////////// BUT SOMETIMES THE CLOUD GETS DESTROYED BECAUSE IT RAINS //////////////////////////////////////////////////////////////////////////////////////////////////
-		if(frnd()<0.99)
+		if(frnd()<0.9999)
 		{
 			writeme->wateramount=1;
 		}
