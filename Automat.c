@@ -115,7 +115,7 @@ void Weather_Simulate(Statistics* stats,int t,int i,int j,Cell *writeme,Cell* re
 		}
 	}
 	/////////// CLOUDS CAN GROW, AND FASTER IF THERE IS WATER UNDER IT ///////////////////////////////////////////////////////////////////////////////////////////////////
-	if(readme->state==WATER && NeighborsValue(op_plus,having_cloud,NULL)>=3 && frnd()>0.9 || NeighborsValue(op_plus,having_cloud,NULL)>=1 && frnd()>0.99)
+	if(readme->state==WATER && NeighborsValue(op_plus,having_cloud,NULL)>=3 && frnd()>0.96 || NeighborsValue(op_plus,having_cloud,NULL)>=1 && frnd()>0.99)
 	{
 		writeme_cloud(1);
 	}
