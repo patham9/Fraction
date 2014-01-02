@@ -73,8 +73,8 @@ void Water_Simulate(Statistics* stats,int t,int i,int j,Cell *writeme,Cell* read
 		writeme_state(WATER); 
 		writeme->rootwater=FirstNeighbor(water_and_higher_than,readme);
 	} 
-	/////////// WATER WITHOUT HAVING A ROOT WATER HAS LOST ITS SOURCE ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	if(readme->state==WATER && readme->rootwater!=NULL && ((Cell*)readme->rootwater)->state!=WATER)
+	/////////// WATER WITHOUT HAVING A ROOT WATER HAS LOST ITS SOURCE, AND IF ROOT IS LOWER, TOO ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	if(readme->state==WATER && readme->rootwater!=NULL && (((Cell*)readme->rootwater)->state!=WATER || ((Cell*)readme->rootwater)->height<readme->height))
 	{
 		writeme_state(GRASS);
 		writeme->rootwater=NULL;
