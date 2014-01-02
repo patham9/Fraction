@@ -94,7 +94,7 @@ void Weather_Simulate(Statistics* stats,int t,int i,int j,Cell *writeme,Cell* re
 	{
 		writeme_cloud(0);
 	}
-	if(right->cloud)
+	if(right->cloud && readme->height<6.5) //don't rain in snow area! - there shouldn't grow forest easily
 	{
 		if(frnd()<0.999)
 			writeme_cloud(1);

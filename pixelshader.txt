@@ -124,7 +124,7 @@ void main()
 	texcolor=vec4(texcolor.rgb,1);	
 	////////////////// PARAMETERS //////////////////////////////////////					
     vec4 camera_position     = vec4(0,10,0,1);								
-    vec4 material_diffuse    = vec4(0.8,1,0.6,1);
+    vec4 material_diffuse    = vec4(0.8,0.8,0.6,1);
 	vec4 material_specular   = vec4(0,0,0,1);
 	float material_shininess = 0.1;
 	vec4 light_specular      = vec4(0.0,0.0,0.0,1); 					

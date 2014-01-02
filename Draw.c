@@ -47,8 +47,8 @@ void draw()
 			if(c->state!=WATER)
 			{
 				toGPU[k]=(c->cloud && !ALLOW_SHADERS)*0.2+0.4+((Cell*)automat->readCells[i][j])->height/15.0; k++;	//use texture for rendering instead in mode 0 //0.5 0.6 0.2
-				toGPU[k]=(c->cloud && !ALLOW_SHADERS)*0.2+0.6+((Cell*)automat->readCells[i][j])->height/15.0; k++;
-				toGPU[k]=(c->cloud && !ALLOW_SHADERS)*0.2+0.2+((Cell*)automat->readCells[i][j])->height/15.0+((Cell*)automat->readCells[i][j])->wateramount/5.0; k++;
+				toGPU[k]=(c->cloud && !ALLOW_SHADERS)*0.2+0.6+((Cell*)automat->readCells[i][j])->height/15.0+(((Cell*)automat->readCells[i][j])->wateramount*2.0-0.1); k++;
+				toGPU[k]=(c->cloud && !ALLOW_SHADERS)*0.2+0.2+((Cell*)automat->readCells[i][j])->height/15.0; k++;
 			}
 			else
 			{
