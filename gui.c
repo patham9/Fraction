@@ -16,18 +16,30 @@ void gui_mouse_down(int player,EventArgs *e)
 		{
             #ifdef DIRECT_PLACEMENT
             //terraforming support in this mode cause its cool :)
-            if(type[player]==TERRAFORM_DOWN)
+            float nom=5,k1,h1;
+            for(k1=-nom;k1<nom;k1+=1)
             {
-                SetCell(i,j,Cell,height,GetCell(i,j,Cell,height)+0.1);
-                Draw_Set_HeightmapChanged();
-                return;
+                for(h1=-nom;h1<nom;h1+=1)
+                {
+                    int k=i+k1, h=j+h1;
+                    if(k>=0 && h>=0 && k<(automat->n) && h<(automat->n))
+                    {
+                        double val=0.1*cos((k1*k1+h1*h1)/(nom*nom));
+                        if(type[player]==TERRAFORM_DOWN)
+                        {
+                            SetCell(k,h,Cell,height,GetCell(k,h,Cell,height)-val);
+                            Draw_Set_HeightmapChanged();
+                        }
+                        if(type[player]==TERRAFORM_UP)
+                        {
+                            SetCell(k,h,Cell,height,GetCell(k,h,Cell,height)+val);
+                            Draw_Set_HeightmapChanged();
+                        }
+                    }
+                }
             }
-            if(type[player]==TERRAFORM_UP)
-            {
-                SetCell(i,j,Cell,height,GetCell(i,j,Cell,height)-0.1);
-                Draw_Set_HeightmapChanged();
+            if(type[player]==TERRAFORM_DOWN || type[player]==TERRAFORM_UP)
                 return;
-            }
             #endif
 			#ifndef DIRECT_PLACEMENT
 			if(type[player]==BASE && !hasbase[player])
