@@ -164,7 +164,7 @@ void main()
 	{
 		gl_FragColor+=vec4(0.05,0.05,0.05,0);
 	}
-    if(texcolor.r>0.9 && type<0.66) //schnee
+    if(texcolor.r>0.85 && type<0.66) //schnee
 	{
         float snd3=snoise(vec3(cord.x*worldsize*5,cord.y*worldsize*5,0));
 		gl_FragColor.g=gl_FragColor.r; 
