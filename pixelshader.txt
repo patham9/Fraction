@@ -139,8 +139,14 @@ void main()
         n+=sobel_normal(texelSize,i); //*2
     } 
     n=n/am;
-    n.z-=1;
-    //n=2*n;
+    ////////////day night cycle
+    float a=atan2(n.x,n.z);
+    float len=sqrt(n.x*n.x+n.z*n.z);
+    a-=0.01*t;
+    n.x=cos(a*2)*len; //day night cycle
+    n.y=sin(a*2)*0.5*len;
+    n.z+=0.2;
+    //////////////////////
 	vec3 r=normalize(-reflect(s.xyz,n));
 	vec3 v=normalize(-light_position.xyz);
 	vec4 diffuse_color=vec4(material_diffuse.xyz*max(0.0,dot(n,s.xyz)),1)*light_diffuse*texcolor*texcolor;
