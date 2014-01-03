@@ -9,7 +9,7 @@ void Generate_World()
 	{
 		for(j=2;j<worldsize-2;j++)
 		{
-			if(frnd()>0.9998)
+			if(drnd()>0.999805) //less probable water, value was: 0.9998
 				SetCell(i,j,Cell,state,WATER);
 			if(frnd()>0.9990)
 			{ 
@@ -17,6 +17,10 @@ void Generate_World()
 				SetCell(i+1,j,Cell,state,FOREST);
 				SetCell(i,j+1,Cell,state,FOREST);
 				SetCell(i-1,j,Cell,state,FOREST);
+                if(frnd()<0.5) //more complex forest patterns
+                    SetCell(i-1,j-1,Cell,state,FOREST);
+                if(frnd()<0.5)
+                    SetCell(i+1,j+1,Cell,state,FOREST);
 			}
 		}
 	}
