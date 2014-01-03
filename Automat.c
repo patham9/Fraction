@@ -128,26 +128,10 @@ void Electricity_Simulate(Statistics* stats,int t,int i,int j,Cell *writeme,Cell
     if(t%1==0)
     {		
 		writeme->wavefront=0;	//current on off pulses through the wire:		
-		if(readme->wavefront==0 && readme->state==OFFCURRENT && NeighborsValue2(op_or,being_a,CURRENT))
-		{ 
-			writeme->state=CURRENT;
-			writeme->wavefront=1;    //it's on the front of the wave
-		} 
-		if(readme->wavefront==0 && readme->state==CURRENT && NeighborsValue2(op_or,being_a,OFFCURRENT))
-		{ 
-			writeme->state=OFFCURRENT;
-			writeme->wavefront=1;    //it's on the front of the wave
-		} 
-		if(readme->wavefront==0 && readme->state==OFFCURRENT && (up->state==SWITCH || down->state==SWITCH || (left->state==SWITCH || (is_logic(left) && left->value)) || (right->state==SWITCH || (is_logic(right) && right->value))))
-		{
-			writeme->state=CURRENT;
-			writeme->wavefront=1;    //it's on the front of the wave
-		}
-		if(readme->wavefront==0 && readme->state==CURRENT && (up->state==OFFSWITCH || down->state==OFFSWITCH || (left->state==OFFSWITCH || (is_logic(left) && !left->value)) || (right->state==OFFSWITCH || (is_logic(right) && !right->value))))
-		{
-			writeme->state=OFFCURRENT;
-			writeme->wavefront=1;    //it's on the front of the wave
-		}
+		if(readme->wavefront==0 && readme->state==OFFCURRENT && (NeighborsValue2(op_or,being_a,CURRENT) || (up->state==SWITCH || down->state==SWITCH || (left->state==SWITCH || (is_logic(left) && left->value)) || (right->state==SWITCH || (is_logic(right) && right->value)))))
+			writeme_state(CURRENT); //writeme_state change also manages the wavefront
+		if(readme->wavefront==0 && readme->state==CURRENT && (NeighborsValue2(op_or,being_a,OFFCURRENT) || (up->state==OFFSWITCH || down->state==OFFSWITCH || (left->state==OFFSWITCH || (is_logic(left) && !left->value)) || (right->state==OFFSWITCH || (is_logic(right) && !right->value)))))
+			writeme_state(OFFCURRENT);
 		//rock with a wire connection is a door, and when current is here, it gets opened
 		if(readme->state==ROCK && NeighborsValue2(op_plus,being_a,CURRENT)==1)
 			writeme->state=OPENROCK;
@@ -165,6 +149,24 @@ void Electricity_Simulate(Statistics* stats,int t,int i,int j,Cell *writeme,Cell
 			writeme->value=(up->state==CURRENT || down->state==CURRENT); //eval state from input connections
 		if(readme->state==XOR)
 			writeme->value=(up->state==CURRENT ^ down->state==CURRENT); //eval state from inp
+        //ADD BIDIRECTIONAL LOGIC BRIDGE TO OVERCOME 2D TOPOLOGY
+        if(readme->state==BRIDGE)
+        {
+            if(left->wavefront)
+                writeme->value=(left->state==CURRENT);
+            else
+            if(right->wavefront)
+                writeme->value=(right->state==CURRENT);
+            if(up->wavefront)
+                writeme->value2=(up->state==CURRENT);
+            else
+            if(down->wavefront)
+                writeme->value2=(down->state==CURRENT);
+        }
+        if(readme->wavefront==0 && readme->state==OFFCURRENT && (((right->state==BRIDGE && right->value) || (left->state==BRIDGE && left->value)) || ((down->state==BRIDGE && down->value2) || (up->state==BRIDGE && up->value2))))
+            writeme_state(CURRENT);
+        if(readme->wavefront==0 && readme->state==CURRENT && (((right->state==BRIDGE && !right->value) || (left->state==BRIDGE && !left->value)) || ((down->state==BRIDGE && !down->value2) || (up->state==BRIDGE && !up->value2))))
+            writeme_state(OFFCURRENT);
     }
 }
 void Automat_Simulate(Statistics* stats,int t,int i,int j,Cell *writeme,Cell* readme,Cell* left,Cell* right,Cell* up,Cell* down,Cell* left_up,Cell* left_down,Cell* right_up,Cell* right_down,Cell ***readcells)

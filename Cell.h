@@ -37,12 +37,13 @@ typedef struct
     
     //logic:
     int wavefront; int value; 
+    int value2; //bridge needs 2 values..
 	
 }Cell;
 Cell *Cell_NEW(int i,int j); 		 									//constructor for a new cell called for every cell when the automat constructor is called
 
 float being_a(Cell *c,int state);
-#define writeme_state(value) do{writeme->state=value; writeme->lastchange=0; if(readme->state==WATER && writeme->state!=WATER || readme->state!=WATER && writeme->state==WATER){Draw_Set_HeightmapChanged();}}while(0)
+#define writeme_state(value) do{writeme->wavefront=1; writeme->state=value; writeme->lastchange=0; if(readme->state==WATER && writeme->state!=WATER || readme->state!=WATER && writeme->state==WATER){Draw_Set_HeightmapChanged();}}while(0)
 #define writeme_person(value) do{writeme->person=value; writeme->lastchange=0;}while(0)
 #define writeme_cloud(value) do{writeme->cloud=value; writeme->lastchange=0; Draw_Set_HeightmapChanged();}while(0)
 

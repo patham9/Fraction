@@ -123,6 +123,7 @@ void gui_key_up(int player,EventArgs *e)
     if(e->mk=='X'){ type[player]=XOR; }
     if(e->mk=='O'){ type[player]=OR; }
     if(e->mk=='C'){ type[player]=CURRENT; }
+    if(e->mk=='M'){ type[player]=BRIDGE; }
 }
 void gui_button(int player,int i)
 {
@@ -189,6 +190,7 @@ void gui_Init()
 	hgui_AddSimpleElem(0.2,0.91,0.09,0.04,"WIREO",client_send_button,'I',OFFCURRENT);
 	hgui_AddSimpleElem(0.3,0.91,0.09,0.04,"ON",client_send_button,'E',SWITCH);
 	hgui_AddSimpleElem(0.4,0.91,0.18,0.04,"OFF",client_send_button,'Q',OFFSWITCH);
+    hgui_AddSimpleElem(0.59,0.91,0.18,0.04,"BRIDGE",client_send_button,'M',BRIDGE);
     hgui_AddSimpleElem(0.78,0.91,0.09,0.04,"NEG",client_send_button,'N',NEG);
 	hgui_AddSimpleElem(0.88,0.91,0.09,0.04,"AND",client_send_button,'A',AND);
     hrend_SetGUIRenderRoutine(gui_buttons_draw);

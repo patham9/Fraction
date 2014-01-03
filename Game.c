@@ -57,6 +57,7 @@ void Game_Init()
     hfio_LoadTex("textures/rock.tga",&ROCK);
     hfio_LoadTex("textures/water.tga",&WATER);
     hfio_LoadTex("textures/agent.tga",&AGENT);
+    hfio_LoadTex("textures/bridge.tga",&BRIDGE);
     hfio_LoadTex("textures/grass.tga",&GRASS);
 	////////////////////////// OTHER INIT STUFF ///////////////////////////////////////////////////////////////
     gui_Init(); //since now buttons are involved GUI needs to be inited after texture loading
