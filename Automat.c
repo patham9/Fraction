@@ -65,7 +65,7 @@ void Water_Simulate(Statistics* stats,int t,int i,int j,Cell *writeme,Cell* read
 	if(readme->state==WATER)
 		writeme->wateramount=1;
 	/////////// GROUND WATER ALSO GETS DISTRUBUTED TO ITS NEIGHBORHOOD	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	if(readme->state!=WATER)
+	if(readme->state!=WATER && frnd()>0.2)
 		writeme->wateramount=8.5*NeighborsValue(op_max,water_amount,NULL)/10;
 	/////////// (WATER FLOWS DOWNWARDS) A CELL WHICH ISN'T ROCK WHICH HAS NEIGHBORS WITH WATER ON A HIGHER POSITION GETS WATER AND REMEMBERS A ROOT CELL /////////////////////////////////////
 	if(readme->state!=WATER && readme->state!=ROCK && NeighborsValue(op_or,water_and_higher_than,readme))
