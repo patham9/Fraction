@@ -46,10 +46,11 @@ void draw()
 			Cell *c=((Cell*)automat->readCells[i][j]);
 			if(c->state!=WATER)
 			{
-				toGPU[k]=(c->cloud && !ALLOW_SHADERS)*0.2+0.4+((Cell*)automat->readCells[i][j])->height/15.0; k++;	//use texture for rendering instead in mode 0 //0.5 0.6 0.2
-				toGPU[k]=(c->cloud && !ALLOW_SHADERS)*0.2+0.6+((Cell*)automat->readCells[i][j])->height/15.0+(((Cell*)automat->readCells[i][j])->wateramount*2.0-0.1); k++;
-				toGPU[k]=(c->cloud && !ALLOW_SHADERS)*0.2+0.2+((Cell*)automat->readCells[i][j])->height/15.0; k++;
-			}
+                float value=(c->cloud && !ALLOW_SHADERS)*0.2+0.4+((Cell*)automat->readCells[i][j])->height/15.0;
+				toGPU[k]=value<0.85? value : 255; k++;	//use texture for rendering instead in mode 0 //0.5 0.6 0.2
+				toGPU[k]=value<0.85? (c->cloud && !ALLOW_SHADERS)*0.2+0.6+((Cell*)automat->readCells[i][j])->height/15.0+(((Cell*)automat->readCells[i][j])->wateramount*2.0-0.1) : 255; k++;
+				toGPU[k]=value<0.85? (c->cloud && !ALLOW_SHADERS)*0.2+0.2+((Cell*)automat->readCells[i][j])->height/15.0 : 255; k++;
+            }
 			else
 			{
                 #ifdef ALLOW_SHADERS
