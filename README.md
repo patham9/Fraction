@@ -13,6 +13,7 @@ fixed function pipeline:
 ![Fraction3](https://user-images.githubusercontent.com/8284677/53295928-a1a96e80-37fd-11e9-8a7c-71c2e51c1f8e.png)
 3d Mode:
 ![3D mode](https://user-images.githubusercontent.com/8284677/53295975-68bdc980-37fe-11e9-94a4-08c2cc8c2c58.png)
+Terrain shadows are cheap and soft, "stolen" from Iñigo ‘iq’ Quilez Elevated: https://www.iquilezles.org/www/material/function2009/function2009.pdf enjoy how beautiful this can look like in the 4KB demo: https://www.youtube.com/watch?v=jB0vBmiTr6o
 
 Comment:
 Test Chamber of OpenNARS-Lab came from Fraction. Quite interesting that the Java implementation was quite a lot more ackward to do than the C implementation with macros. Often it is said that Java is more high-level, but from what I am able to do with macros I always get the exact opposite impression, if you are a skilled coder C gives you wings.
