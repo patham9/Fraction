@@ -15,4 +15,4 @@ fixed function pipeline:
 ![3D mode](https://user-images.githubusercontent.com/8284677/53295975-68bdc980-37fe-11e9-94a4-08c2cc8c2c58.png)
 
 Comment:
-Test Chamber of OpenNARS-Lab came from Fraction. Quite interesting that the Java implementation was quite a lot more ackward to do than the C implementation with macros. Often it is said that Java is more high-level, but from what I am able to do with macros I always get the exact opposite impression.
+Test Chamber of OpenNARS-Lab came from Fraction. Quite interesting that the Java implementation was quite a lot more ackward to do than the C implementation with macros. Often it is said that Java is more high-level, but from what I am able to do with macros I always get the exact opposite impression, if you are a skilled coder C gives you wings.
