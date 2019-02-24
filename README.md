@@ -1,6 +1,6 @@
 # Fraction
 A strategy game written in C that builds completely on a cellular automata for all game logic, including AI's pathfinding, cloud movement, ground water propagation, water propagation, citybuilder AI, forest growth, electricity etc.
-Comes with functioning multiplayer, which can be started by just opening http://91.203.212.130/Server.php in your browser and keeping it open, needs 2 clients to connect before you can play. Once you are connected you can place a base, the rest will only result in a construction site sign and will be constructed by your workers.
+Comes with functioning multiplayer, which (the server, not the client) can be started by just opening http://91.203.212.130/Server.php in your browser and keeping it open, needs 2 clients to connect before you can play. Once you are connected you can place a base, the rest will only result in a construction site sign and will be constructed by your workers.
 
 Original Wiki: http://91.203.212.130/fraction/
 
