@@ -6,4 +6,4 @@ A programmable strategy game.
 old graphics:
 ![Fraction2](https://user-images.githubusercontent.com/8284677/53295829-c0a70100-37fb-11e9-9eee-a90a656ee6fc.png)
 fixed function pipeline:
-![Fraction3](https://user-images.githubusercontent.com/8284677/53295857-4b87fb80-37fc-11e9-9d20-5f4a45d88c0f.png)
+![Fraction3](https://user-images.githubusercontent.com/8284677/53295928-a1a96e80-37fd-11e9-8a7c-71c2e51c1f8e.png)
