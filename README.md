@@ -4,6 +4,8 @@ Comes with functioning multiplayer, which can be started by just opening http://
 
 Original Wiki: http://91.203.212.130/fraction/
 
+Dependency: glfw-2.7.9
+
 ![Fraction1](https://user-images.githubusercontent.com/8284677/53295826-bdac1080-37fb-11e9-876a-7c1b32ddcf46.png)
 old graphics:
 ![Fraction2](https://user-images.githubusercontent.com/8284677/53295829-c0a70100-37fb-11e9-9eee-a90a656ee6fc.png)
