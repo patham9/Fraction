@@ -215,8 +215,10 @@ void free2Df(float **array2D,int nRows)
 
 Thread Thread_NEW(ThreadFunc fun,void *arg)
 {
+	pthread_t thread;
+	pthread_create(&thread, NULL, fun, NULL);
 //#if OS!=9 && OS!=1
-	return glfwCreateThread(fun,arg);
+//	return glfwCreateThread(fun,arg);
 //#endif
 //#if OS==9
 //	return NULL;
