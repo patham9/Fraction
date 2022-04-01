@@ -10,13 +10,14 @@ void Game_Thread()
 {
 	Statistics *s=statistics_new();
 	int laststep=-1;
-	while(1)
+	//while(1)
 	{
 		if(!SINGLEPLAYER && get_step()==laststep)
 		{
 			laststep=get_step();
 			Wait(0.001);
-			continue;
+			//continue;
+			return;
 		}
 		set_finished(0);
 		Wait(0.001);
@@ -29,10 +30,21 @@ void Game_Thread()
 		Wait(0.001);
 	}					
 }
+
+int timecounter = 1;
+void draw_and_progress()
+{
+	draw();
+	//if(timecounter % 100 == 0)
+	{
+		Game_Thread();	
+	}
+}
+
 void Game_Init()
 {
 	////////////////////////// MAKE EVENT HANDLERS KNOWN TO HAMLIB //////////////////////////////////////////////
-	hnav_SetRendFunc(draw);
+	hnav_SetRendFunc(draw_and_progress);
 	hrend_2Dmode(0.5,0.6,0.5);
 	////////////////////////// LOAD TEXTURES ///////////////////////////////////////////////////////////////
 	hfio_LoadTex("textures/command.tga",&COMMAND);
@@ -65,7 +77,7 @@ void Game_Init()
 	landscape=Generate_PerlinNoise(worldsize,worldsize,Generate_WhiteNoise(worldsize,worldsize),8,0);
 	automat=Hauto_OBJ_NEW(worldsize,Automat_Simulate,Cell_NEW);
 	Generate_World();
-	Thread_NEW(Game_Thread,NULL);
+	//Thread_NEW(Game_Thread,NULL);
 }
 int main()
 {

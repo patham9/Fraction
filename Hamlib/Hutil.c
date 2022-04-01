@@ -215,12 +215,12 @@ void free2Df(float **array2D,int nRows)
 
 Thread Thread_NEW(ThreadFunc fun,void *arg)
 {
-#if OS!=9 && OS!=1
+//#if OS!=9 && OS!=1
 	return glfwCreateThread(fun,arg);
-#endif
-#if OS==9
-	return NULL;
-#endif
+//#endif
+//#if OS==9
+//	return NULL;
+//#endif
 }
 //**void Thread_DEL(Thread thr)
 //**{

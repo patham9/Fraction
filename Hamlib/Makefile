@@ -1,6 +1,6 @@
 VERSION = 3.02
 CC      = gcc
-CFLAGS  =  `pkg-config --cflags libglfw` -Wall -g -D_REENTRANT -DVERSION=\"$(VERSION)\"
+CFLAGS  =  `pkg-config --cflags libglfw` -fcommon -Wall -g -D_REENTRANT -DVERSION=\"$(VERSION)\"
 LDFLAGS = -lGL -lGLU -lglut -lGLEW -lglfw -lm -lpthread
 SERVER_LDFLAGS = -lm -lpthread -lglfw
 
