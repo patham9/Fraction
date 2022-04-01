@@ -80,11 +80,11 @@ void keydown(EventArgs *e)
 {
 	if(e->mk==KEY_UP)
 	{
-		//hnav.dify+=(-camspeed)/(float)hrend.height;
+		hnav.dify+=(-camspeed)/(float)hrend.height;
 	}
 	if(e->mk==KEY_DOWN)
 	{
-		//hnav.dify+=(camspeed)/(float)hrend.height;
+		hnav.dify+=(camspeed)/(float)hrend.height;
 	}
 	if(e->mk==KEY_LEFT)
 	{
@@ -94,14 +94,14 @@ void keydown(EventArgs *e)
 	{
 		hnav.difx+=(-camspeed)/(float)hrend.width;
 	}
-	if(e->mk==KEY_MINUS || e->mk=='#' || e->mk==KEY_DOWN)
+	if(e->mk==KEY_MINUS || e->mk=='#')// || e->mk==KEY_DOWN)
 	{
 		float zoomBefore=hnav.zoom;
 		hnav.zoom*=scrollcammult;
 		hnav.difx=(hnav.difx)*(hnav.zoom/zoomBefore);
 		hnav.dify=(hnav.dify)*(hnav.zoom/zoomBefore);
 	}
-	if(e->mk==KEY_PLUS || e->mk=='+' || e->mk==KEY_UP)
+	if(e->mk==KEY_PLUS || e->mk=='+')// || e->mk==KEY_UP)
 	{
 		float zoomBefore=hnav.zoom;
 		hnav.zoom/=scrollcammult;
